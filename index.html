@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICU Calculator Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4C4BC7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-primary mb-2">ICU Calculator Suite</h1>
+            <p class="text-gray-600 dark:text-gray-400">Essential calculators for intensive care medicine</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex flex-wrap justify-center mb-6 border-b border-gray-200 dark:border-gray-700">
+            <button class="tab-btn active px-4 py-2 text-base font-medium border-b-2 border-primary text-primary" data-tab="hemodynamic">Hemodynamic</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="respiratory">Respiratory</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="renal">Renal</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="scoring">Scoring</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="dosing">Dosing</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="fluid">Fluid/Electrolytes</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="preop">Preoperative Risk</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="delirium">Delirium/Sedation</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="specialized">Specialized Scores</button>
+        </div>
+
+        <!-- Calculator Sections -->
+        <!-- Hemodynamic Tab -->
+        <div id="hemodynamic" class="tab-content">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cardiac Output/Index -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Cardiac Output & Index</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Heart Rate (bpm)</label>
+                            <input type="number" id="hr-co" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Stroke Volume (mL)</label>
+                            <input type="number" id="sv-co" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">BSA (m²)</label>
+                            <input type="number" step="0.01" id="bsa-co" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="1.8">
+                        </div>
+                        <button onclick="calculateCO()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="co-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- SVR -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Systemic Vascular Resistance</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">MAP (mmHg)</label>
+                            <input type="number" id="map-svr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">CVP (mmHg)</label>
+                            <input type="number" id="cvp-svr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="8">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cardiac Output (L/min)</label>
+                            <input type="number" step="0.1" id="co-svr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="5">
+                        </div>
+                        <button onclick="calculateSVR()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="svr-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- MAP Calculator -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Mean Arterial Pressure</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Systolic BP (mmHg)</label>
+                            <input type="number" id="sbp-map" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="120">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Diastolic BP (mmHg)</label>
+                            <input type="number" id="dbp-map" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="80">
+                        </div>
+                        <button onclick="calculateMAP()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="map-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Respiratory Tab -->
+        <div id="respiratory" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- P/F Ratio -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">P/F Ratio (PaO₂/FiO₂)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PaO₂ (mmHg)</label>
+                            <input type="number" id="pao2" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">FiO₂ (%)</label>
+                            <input type="number" id="fio2" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="21">
+                        </div>
+                        <button onclick="calculatePF()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="pf-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- A-a Gradient -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">A-a Gradient</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">FiO₂ (%)</label>
+                            <input type="number" id="fio2-aa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="21">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PaO₂ (mmHg)</label>
+                            <input type="number" id="pao2-aa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PaCO₂ (mmHg)</label>
+                            <input type="number" id="paco2-aa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="40">
+                        </div>
+                        <button onclick="calculateAaGradient()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="aa-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Ventilator Settings -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Ideal Tidal Volume</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                            <input type="number" id="weight-tv" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Gender</label>
+                            <select id="gender-tv" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Height (cm)</label>
+                            <input type="number" id="height-tv" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="170">
+                        </div>
+                        <button onclick="calculateTidalVolume()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="tv-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Renal Tab -->
+        <div id="renal" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Creatinine Clearance -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Creatinine Clearance</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Age (years)</label>
+                            <input type="number" id="age-ccr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                            <input type="number" id="weight-ccr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Serum Creatinine (mg/dL)</label>
+                            <input type="number" step="0.1" id="scr-ccr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="1.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Gender</label>
+                            <select id="gender-ccr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateCCr()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="ccr-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- FeNa -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Fractional Excretion of Na⁺</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Urine Na⁺ (mEq/L)</label>
+                            <input type="number" id="urine-na" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="40">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Serum Na⁺ (mEq/L)</label>
+                            <input type="number" id="serum-na" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="140">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Urine Creatinine (mg/dL)</label>
+                            <input type="number" id="urine-cr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Serum Creatinine (mg/dL)</label>
+                            <input type="number" step="0.1" id="serum-cr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="1.0">
+                        </div>
+                        <button onclick="calculateFeNa()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="fena-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Anion Gap -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Anion Gap</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Na⁺ (mEq/L)</label>
+                            <input type="number" id="na-ag" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="140">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cl⁻ (mEq/L)</label>
+                            <input type="number" id="cl-ag" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="105">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">HCO₃⁻ (mEq/L)</label>
+                            <input type="number" id="hco3-ag" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="24">
+                        </div>
+                        <button onclick="calculateAnionGap()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="ag-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scoring Tab -->
+        <div id="scoring" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Glasgow Coma Scale -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Glasgow Coma Scale</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Eye Opening</label>
+                            <select id="eye-gcs" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="4">Spontaneous (4)</option>
+                                <option value="3">To voice (3)</option>
+                                <option value="2">To pain (2)</option>
+                                <option value="1">None (1)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Verbal Response</label>
+                            <select id="verbal-gcs" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="5">Oriented (5)</option>
+                                <option value="4">Confused (4)</option>
+                                <option value="3">Inappropriate words (3)</option>
+                                <option value="2">Incomprehensible sounds (2)</option>
+                                <option value="1">None (1)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Motor Response</label>
+                            <select id="motor-gcs" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="6">Obeys commands (6)</option>
+                                <option value="5">Localizes pain (5)</option>
+                                <option value="4">Withdraws (4)</option>
+                                <option value="3">Flexion to pain (3)</option>
+                                <option value="2">Extension to pain (2)</option>
+                                <option value="1">None (1)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateGCS()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="gcs-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- RASS Score -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">RASS Score</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Sedation Level</label>
+                            <select id="rass-score" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="4">Combative (+4)</option>
+                                <option value="3">Very agitated (+3)</option>
+                                <option value="2">Agitated (+2)</option>
+                                <option value="1">Restless (+1)</option>
+                                <option value="0">Alert and calm (0)</option>
+                                <option value="-1">Drowsy (-1)</option>
+                                <option value="-2">Light sedation (-2)</option>
+                                <option value="-3">Moderate sedation (-3)</option>
+                                <option value="-4">Deep sedation (-4)</option>
+                                <option value="-5">Unarousable (-5)</option>
+                            </select>
+                        </div>
+                        <button onclick="showRASSResult()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Show Description</button>
+                        <div id="rass-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- SOFA Score -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">SOFA Score</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Respiratory (PaO₂/FiO₂)</label>
+                            <select id="resp-sofa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">≥400 (0)</option>
+                                <option value="1">300-399 (1)</option>
+                                <option value="2">200-299 (2)</option>
+                                <option value="3">100-199 (3)</option>
+                                <option value="4">&lt;100 (4)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cardiovascular (MAP/Vasopressors)</label>
+                            <select id="cardio-sofa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">MAP ≥70 (0)</option>
+                                <option value="1">MAP <70 (1)</option>
+                                <option value="2">Dopamine ≤5 or dobutamine (2)</option>
+                                <option value="3">Dopamine >5 or epi/norepi ≤0.1 (3)</option>
+                                <option value="4">Dopamine >15 or epi/norepi >0.1 (4)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">CNS (GCS)</label>
+                            <select id="cns-sofa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">15 (0)</option>
+                                <option value="1">13-14 (1)</option>
+                                <option value="2">10-12 (2)</option>
+                                <option value="3">6-9 (3)</option>
+                                <option value="4">3-5 (4)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Renal (Creatinine mg/dL)</label>
+                            <select id="renal-sofa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0"><1.2 (0)</option>
+                                <option value="1">1.2-1.9 (1)</option>
+                                <option value="2">2.0-3.4 (2)</option>
+                                <option value="3">3.5-4.9 or <500ml/day (3)</option>
+                                <option value="4">≥5.0 or <200ml/day (4)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateFullSOFA()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="full-sofa-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- APACHE II -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">APACHE II (Simplified)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Age (years)</label>
+                            <input type="number" id="apache-age" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Temperature (°C)</label>
+                            <input type="number" step="0.1" id="apache-temp" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="37.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Heart Rate (bpm)</label>
+                            <input type="number" id="apache-hr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Mean BP (mmHg)</label>
+                            <input type="number" id="apache-map" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Respiratory Rate</label>
+                            <input type="number" id="apache-rr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="16">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Glasgow Coma Score</label>
+                            <input type="number" id="apache-gcs" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="15">
+                        </div>
+                        <button onclick="calculateAPACHE()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="apache-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- qSOFA -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">qSOFA (Quick SOFA)</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="qsofa-sbp" class="mr-2">
+                                <span class="text-sm">Systolic BP ≤100 mmHg (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="qsofa-rr" class="mr-2">
+                                <span class="text-sm">Respiratory Rate ≥22/min (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="qsofa-mental" class="mr-2">
+                                <span class="text-sm">Altered mental status (1 pt)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateqSOFA()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="qsofa-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- NEWS -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">NEWS (National Early Warning Score)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Respiratory Rate</label>
+                            <select id="news-rr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="3">≤8 (3)</option>
+                                <option value="1">9-11 (1)</option>
+                                <option value="0">12-20 (0)</option>
+                                <option value="2">21-24 (2)</option>
+                                <option value="3">≥25 (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Oxygen Saturation</label>
+                            <select id="news-spo2" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="3">≤91 (3)</option>
+                                <option value="2">92-93 (2)</option>
+                                <option value="1">94-95 (1)</option>
+                                <option value="0">≥96 (0)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Temperature (°C)</label>
+                            <select id="news-temp" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="3">≤35.0 (3)</option>
+                                <option value="1">35.1-36.0 (1)</option>
+                                <option value="0">36.1-38.0 (0)</option>
+                                <option value="1">38.1-39.0 (1)</option>
+                                <option value="2">≥39.1 (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Systolic BP</label>
+                            <select id="news-sbp" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="3">≤90 (3)</option>
+                                <option value="2">91-100 (2)</option>
+                                <option value="1">101-110 (1)</option>
+                                <option value="0">111-219 (0)</option>
+                                <option value="3">≥220 (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Heart Rate</label>
+                            <select id="news-hr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="3">≤40 (3)</option>
+                                <option value="1">41-50 (1)</option>
+                                <option value="0">51-90 (0)</option>
+                                <option value="1">91-110 (1)</option>
+                                <option value="2">111-130 (2)</option>
+                                <option value="3">≥131 (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Level of Consciousness</label>
+                            <select id="news-conscious" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">Alert (0)</option>
+                                <option value="3">New confusion/Voice/Pain/Unresponsive (3)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateNEWS()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="news-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- CURB-65 -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">CURB-65 (Pneumonia Severity)</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="curb-confusion" class="mr-2">
+                                <span class="text-sm">Confusion (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="curb-urea" class="mr-2">
+                                <span class="text-sm">BUN >19 mg/dL (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="curb-rr" class="mr-2">
+                                <span class="text-sm">Respiratory Rate ≥30 (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="curb-bp" class="mr-2">
+                                <span class="text-sm">SBP <90 or DBP ≤60 (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="curb-age" class="mr-2">
+                                <span class="text-sm">Age ≥65 years (1 pt)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateCURB65()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="curb65-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Wells Score DVT -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Wells Score (DVT)</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-cancer" class="mr-2" data-points="1">
+                                <span class="text-sm">Active cancer (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-paralysis" class="mr-2" data-points="1">
+                                <span class="text-sm">Paralysis/immobilization (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-bedridden" class="mr-2" data-points="1">
+                                <span class="text-sm">Bedridden >3 days/surgery (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-tenderness" class="mr-2" data-points="1">
+                                <span class="text-sm">Localized tenderness (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-swelling" class="mr-2" data-points="1">
+                                <span class="text-sm">Entire leg swelling (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-calf" class="mr-2" data-points="1">
+                                <span class="text-sm">Calf swelling >3cm (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pitting" class="mr-2" data-points="1">
+                                <span class="text-sm">Pitting edema (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-collateral" class="mr-2" data-points="1">
+                                <span class="text-sm">Collateral veins (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-alternative" class="mr-2" data-points="-2">
+                                <span class="text-sm">Alternative diagnosis (-2 pt)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateWellsDVT()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="wells-dvt-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- CHA2DS2-VASc -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">CHA₂DS₂-VASc Score</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-chf" class="mr-2" data-points="1">
+                                <span class="text-sm">CHF/LV dysfunction (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-htn" class="mr-2" data-points="1">
+                                <span class="text-sm">Hypertension (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-age75" class="mr-2" data-points="2">
+                                <span class="text-sm">Age ≥75 years (2 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-dm" class="mr-2" data-points="1">
+                                <span class="text-sm">Diabetes mellitus (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-stroke" class="mr-2" data-points="2">
+                                <span class="text-sm">Stroke/TIA/thromboembolism (2 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-vascular" class="mr-2" data-points="1">
+                                <span class="text-sm">Vascular disease (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-age65" class="mr-2" data-points="1">
+                                <span class="text-sm">Age 65-74 years (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="chads-female" class="mr-2" data-points="1">
+                                <span class="text-sm">Female sex (1 pt)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateCHADS2VASc()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="chads-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dosing Tab -->
+        <div id="dosing" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Body Surface Area -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Body Surface Area</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Height (cm)</label>
+                            <input type="number" id="height-bsa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="170">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                            <input type="number" id="weight-bsa" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <button onclick="calculateBSA()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="bsa-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Ideal Body Weight -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Ideal Body Weight</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Height (cm)</label>
+                            <input type="number" id="height-ibw" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="170">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Gender</label>
+                            <select id="gender-ibw" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateIBW()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="ibw-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Caloric Needs -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Caloric Needs (Harris-Benedict)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Age (years)</label>
+                            <input type="number" id="age-cal" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                            <input type="number" id="weight-cal" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Height (cm)</label>
+                            <input type="number" id="height-cal" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="170">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Gender</label>
+                            <select id="gender-cal" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateCalories()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="cal-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fluid/Electrolytes Tab -->
+        <div id="fluid" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Sodium Correction -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Sodium Correction</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Current Na⁺ (mEq/L)</label>
+                            <input type="number" id="current-na" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="125">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Target Na⁺ (mEq/L)</label>
+                            <input type="number" id="target-na" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="135">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                            <input type="number" id="weight-na" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Gender</label>
+                            <select id="gender-na" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateNaCorrection()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="na-correction-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Osmolality -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Serum Osmolality</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Na⁺ (mEq/L)</label>
+                            <input type="number" id="na-osm" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="140">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">BUN (mg/dL)</label>
+                            <input type="number" id="bun-osm" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="14">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Glucose (mg/dL)</label>
+                            <input type="number" id="glucose-osm" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="100">
+                        </div>
+                        <button onclick="calculateOsmolality()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="osm-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Corrected Calcium -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Corrected Calcium</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Total Calcium (mg/dL)</label>
+                            <input type="number" step="0.1" id="total-ca" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="9.5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Albumin (g/dL)</label>
+                            <input type="number" step="0.1" id="albumin-ca" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="4.0">
+                        </div>
+                        <button onclick="calculateCorrectedCalcium()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="ca-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preoperative Risk Tab -->
+        <div id="preop" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Revised Cardiac Risk Index (RCRI) -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Revised Cardiac Risk Index (RCRI)</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="rcri-surgery" class="mr-2">
+                                <span class="text-sm">High-risk surgery</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="rcri-cad" class="mr-2">
+                                <span class="text-sm">History of CAD</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="rcri-chf" class="mr-2">
+                                <span class="text-sm">History of CHF</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="rcri-cvd" class="mr-2">
+                                <span class="text-sm">History of CVD</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="rcri-insulin" class="mr-2">
+                                <span class="text-sm">Insulin-dependent DM</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="rcri-creatinine" class="mr-2">
+                                <span class="text-sm">Creatinine >2.0 mg/dL</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateRCRI()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="rcri-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- ASA Physical Status -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">ASA Physical Status</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">ASA Class</label>
+                            <select id="asa-class" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1">ASA I - Normal healthy patient</option>
+                                <option value="2">ASA II - Mild systemic disease</option>
+                                <option value="3">ASA III - Severe systemic disease</option>
+                                <option value="4">ASA IV - Severe disease, constant threat to life</option>
+                                <option value="5">ASA V - Moribund, not expected to survive</option>
+                                <option value="6">ASA VI - Brain-dead organ donor</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="asa-emergency" class="mr-2">
+                            <label class="text-sm">Emergency procedure (+E)</label>
+                        </div>
+                        <button onclick="showASAResult()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Show Risk</button>
+                        <div id="asa-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- METS Assessment -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Metabolic Equivalents (METS)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Functional Capacity</label>
+                            <select id="mets-level" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1">1-3 METS - Light housework, walk 1-2 blocks</option>
+                                <option value="4">4-6 METS - Climb stairs, heavy housework</option>
+                                <option value="7">7-9 METS - Singles tennis, skiing</option>
+                                <option value="10">≥10 METS - Swimming, running</option>
+                            </select>
+                        </div>
+                        <button onclick="showMETSResult()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Assess Risk</button>
+                        <div id="mets-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Perioperative Bleeding Risk -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Bleeding Risk Assessment</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bleed-anticoag" class="mr-2">
+                                <span class="text-sm">Anticoagulant use</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bleed-plt" class="mr-2">
+                                <span class="text-sm">Platelet count <100k</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bleed-liver" class="mr-2">
+                                <span class="text-sm">Liver disease</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bleed-renal" class="mr-2">
+                                <span class="text-sm">Renal dysfunction</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bleed-prior" class="mr-2">
+                                <span class="text-sm">Prior bleeding history</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateBleedingRisk()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="bleeding-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Pulmonary Risk -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Pulmonary Risk Factors</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pulm-copd" class="mr-2">
+                                <span class="text-sm">COPD/Asthma</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pulm-smoking" class="mr-2">
+                                <span class="text-sm">Current smoking</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pulm-upper" class="mr-2">
+                                <span class="text-sm">Upper abdominal/thoracic surgery</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pulm-duration" class="mr-2">
+                                <span class="text-sm">Surgery >3 hours</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pulm-age" class="mr-2">
+                                <span class="text-sm">Age >70 years</span>
+                            </label>
+                        </div>
+                        <button onclick="calculatePulmonaryRisk()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="pulmonary-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- VTE Risk Assessment -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">VTE Risk (Caprini Score)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Age</label>
+                            <select id="vte-age" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0"><40 years (0)</option>
+                                <option value="1">40-60 years (1)</option>
+                                <option value="2">61-74 years (2)</option>
+                                <option value="3">≥75 years (3)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="vte-cancer" class="mr-2" data-points="2">
+                                <span class="text-sm">Active cancer (2 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="vte-major" class="mr-2" data-points="2">
+                                <span class="text-sm">Major surgery (2 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="vte-immobility" class="mr-2" data-points="1">
+                                <span class="text-sm">Bed rest >72h (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="vte-prior" class="mr-2" data-points="3">
+                                <span class="text-sm">Prior VTE (3 pts)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateVTERisk()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="vte-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delirium/Sedation Tab -->
+        <div id="delirium" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- CAM-ICU -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">CAM-ICU (Delirium Assessment)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">1. Acute Mental Status Change/Fluctuation</label>
+                            <select id="cam-acute" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="absent">Absent</option>
+                                <option value="present">Present</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">2. Inattention (SAVEAHAART)</label>
+                            <select id="cam-inattention" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="absent">Absent (≤2 errors)</option>
+                                <option value="present">Present (>2 errors)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">3A. Altered Level of Consciousness</label>
+                            <select id="cam-consciousness" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="absent">Alert (RASS 0)</option>
+                                <option value="present">Vigilant (+1), Lethargic (-1), Stupor (-2), Coma (-3 to -5)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">3B. Disorganized Thinking</label>
+                            <select id="cam-thinking" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="absent">Absent (≤1 error)</option>
+                                <option value="present">Present (>1 error)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateCAMICU()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="cam-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- ICDSC -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">ICDSC (Delirium Screening)</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-altered" class="mr-2" data-points="1">
+                                <span class="text-sm">Altered level of consciousness (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-inattention" class="mr-2" data-points="1">
+                                <span class="text-sm">Inattention (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-disorientation" class="mr-2" data-points="1">
+                                <span class="text-sm">Disorientation (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-hallucination" class="mr-2" data-points="1">
+                                <span class="text-sm">Hallucination/delusion/psychosis (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-agitation" class="mr-2" data-points="1">
+                                <span class="text-sm">Psychomotor agitation/retardation (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-speech" class="mr-2" data-points="1">
+                                <span class="text-sm">Inappropriate speech/mood (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-sleep" class="mr-2" data-points="1">
+                                <span class="text-sm">Sleep/wake cycle disturbance (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="icdsc-fluctuation" class="mr-2" data-points="1">
+                                <span class="text-sm">Symptom fluctuation (1 pt)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateICDSC()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="icdsc-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Sedation-Agitation Scale (SAS) -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">SAS (Sedation-Agitation Scale)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Sedation Level</label>
+                            <select id="sas-level" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="7">7 - Dangerous agitation</option>
+                                <option value="6">6 - Very agitated</option>
+                                <option value="5">5 - Agitated</option>
+                                <option value="4">4 - Calm and cooperative</option>
+                                <option value="3">3 - Sedated</option>
+                                <option value="2">2 - Very sedated</option>
+                                <option value="1">1 - Unarousable</option>
+                            </select>
+                        </div>
+                        <button onclick="showSASResult()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Show Description</button>
+                        <div id="sas-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- SIRS Criteria -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">SIRS Criteria</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="sirs-temp" class="mr-2">
+                                <span class="text-sm">Temperature >38°C or <36°C</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="sirs-hr" class="mr-2">
+                                <span class="text-sm">Heart rate >90 bpm</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="sirs-rr" class="mr-2">
+                                <span class="text-sm">RR >20 or PaCO₂ <32 mmHg</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="sirs-wbc" class="mr-2">
+                                <span class="text-sm">WBC >12k, <4k, or >10% bands</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateSIRS()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="sirs-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specialized Scores Tab -->
+        <div id="specialized" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- SAPS II -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">SAPS II (Simplified)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Age (years)</label>
+                            <input type="number" id="saps-age" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Heart Rate (bpm)</label>
+                            <input type="number" id="saps-hr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Systolic BP (mmHg)</label>
+                            <input type="number" id="saps-sbp" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="120">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Temperature (°C)</label>
+                            <input type="number" step="0.1" id="saps-temp" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="37.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Glasgow Coma Score</label>
+                            <input type="number" id="saps-gcs" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="15">
+                        </div>
+                        <button onclick="calculateSAPS2()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="saps-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Wells PE -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Wells Score (Pulmonary Embolism)</h3>
+                    <div class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-dvt" class="mr-2" data-points="3">
+                                <span class="text-sm">DVT signs/symptoms (3 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-alternative" class="mr-2" data-points="3">
+                                <span class="text-sm">PE most likely diagnosis (3 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-hr" class="mr-2" data-points="1.5">
+                                <span class="text-sm">Heart rate >100 (1.5 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-immobility" class="mr-2" data-points="1.5">
+                                <span class="text-sm">Immobilization/surgery (1.5 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-prior" class="mr-2" data-points="1.5">
+                                <span class="text-sm">Previous DVT/PE (1.5 pts)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-hemoptysis" class="mr-2" data-points="1">
+                                <span class="text-sm">Hemoptysis (1 pt)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="wells-pe-cancer" class="mr-2" data-points="1">
+                                <span class="text-sm">Cancer (1 pt)</span>
+                            </label>
+                        </div>
+                        <button onclick="calculateWellsPE()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="wells-pe-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- HEART Score -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">HEART Score</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">History</label>
+                            <select id="heart-history" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">Slightly suspicious (0)</option>
+                                <option value="1">Moderately suspicious (1)</option>
+                                <option value="2">Highly suspicious (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">ECG</label>
+                            <select id="heart-ecg" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">Normal (0)</option>
+                                <option value="1">Non-specific repolarization (1)</option>
+                                <option value="2">Significant ST deviation (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Age</label>
+                            <select id="heart-age" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0"><45 years (0)</option>
+                                <option value="1">45-64 years (1)</option>
+                                <option value="2">≥65 years (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Risk Factors</label>
+                            <select id="heart-risk" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">No risk factors (0)</option>
+                                <option value="1">1-2 risk factors (1)</option>
+                                <option value="2">≥3 risk factors (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Troponin</label>
+                            <select id="heart-troponin" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">≤normal limit (0)</option>
+                                <option value="1">1-3x normal limit (1)</option>
+                                <option value="2">>3x normal limit (2)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateHEART()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="heart-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- Child-Pugh Score -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Child-Pugh Score</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Bilirubin (mg/dL)</label>
+                            <select id="child-bilirubin" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1"><2 (1)</option>
+                                <option value="2">2-3 (2)</option>
+                                <option value="3">>3 (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Albumin (g/dL)</label>
+                            <select id="child-albumin" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1">>3.5 (1)</option>
+                                <option value="2">2.8-3.5 (2)</option>
+                                <option value="3"><2.8 (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PT/INR</label>
+                            <select id="child-pt" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1">INR <1.7 (1)</option>
+                                <option value="2">INR 1.7-2.3 (2)</option>
+                                <option value="3">INR >2.3 (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Ascites</label>
+                            <select id="child-ascites" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1">None (1)</option>
+                                <option value="2">Slight (2)</option>
+                                <option value="3">Moderate (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Encephalopathy</label>
+                            <select id="child-enceph" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="1">None (1)</option>
+                                <option value="2">Grade 1-2 (2)</option>
+                                <option value="3">Grade 3-4 (3)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateChildPugh()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="child-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- MELD Score -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">MELD Score</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Bilirubin (mg/dL)</label>
+                            <input type="number" step="0.1" id="meld-bilirubin" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="1.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Creatinine (mg/dL)</label>
+                            <input type="number" step="0.1" id="meld-creatinine" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="1.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">INR</label>
+                            <input type="number" step="0.1" id="meld-inr" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700" placeholder="1.0">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="meld-dialysis" class="mr-2">
+                            <label class="text-sm">On dialysis (≥2 sessions in past week)</label>
+                        </div>
+                        <button onclick="calculateMELD()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="meld-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+
+                <!-- DIC Score -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">DIC Score (ISTH)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Platelet Count</label>
+                            <select id="dic-platelets" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">>100k (0)</option>
+                                <option value="1">50-100k (1)</option>
+                                <option value="2"><50k (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">D-dimer/Fibrin Products</label>
+                            <select id="dic-ddimer" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">Normal (0)</option>
+                                <option value="2">Moderate increase (2)</option>
+                                <option value="3">Strong increase (3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PT Prolongation</label>
+                            <select id="dic-pt" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0"><3 sec (0)</option>
+                                <option value="1">3-6 sec (1)</option>
+                                <option value="2">>6 sec (2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Fibrinogen</label>
+                            <select id="dic-fibrinogen" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                                <option value="0">>1.0 g/L (0)</option>
+                                <option value="1"><1.0 g/L (1)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateDIC()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
+                        <div id="dic-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Tab functionality
+        function switchTab(tabName) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-primary', 'text-primary');
+                btn.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Add active class to clicked button and show corresponding content
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active', 'border-primary', 'text-primary');
+                activeButton.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            }
+            
+            const activeContent = document.getElementById(tabName);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabName = button.dataset.tab;
+                switchTab(tabName);
+            });
+        });
+
+        // Calculator functions
+        function calculateCO() {
+            const hr = parseFloat(document.getElementById('hr-co').value);
+            const sv = parseFloat(document.getElementById('sv-co').value);
+            const bsa = parseFloat(document.getElementById('bsa-co').value);
+            
+            if (hr && sv && bsa) {
+                const co = (hr * sv) / 1000;
+                const ci = co / bsa;
+                document.getElementById('co-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        Cardiac Output: ${co.toFixed(1)} L/min<br>
+                        Cardiac Index: ${ci.toFixed(1)} L/min/m²<br>
+                        <span class="text-xs text-gray-500">Normal CI: 2.5-4.0 L/min/m²</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateSVR() {
+            const map = parseFloat(document.getElementById('map-svr').value);
+            const cvp = parseFloat(document.getElementById('cvp-svr').value);
+            const co = parseFloat(document.getElementById('co-svr').value);
+            
+            if (map && cvp && co) {
+                const svr = ((map - cvp) / co) * 80;
+                document.getElementById('svr-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        SVR: ${svr.toFixed(0)} dynes·sec·cm⁻⁵<br>
+                        <span class="text-xs text-gray-500">Normal: 800-1200</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateMAP() {
+            const sbp = parseFloat(document.getElementById('sbp-map').value);
+            const dbp = parseFloat(document.getElementById('dbp-map').value);
+            
+            if (sbp && dbp) {
+                const map = dbp + ((sbp - dbp) / 3);
+                document.getElementById('map-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        MAP: ${map.toFixed(0)} mmHg<br>
+                        <span class="text-xs text-gray-500">Target: >65 mmHg</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculatePF() {
+            const pao2 = parseFloat(document.getElementById('pao2').value);
+            const fio2 = parseFloat(document.getElementById('fio2').value);
+            
+            if (pao2 && fio2) {
+                const pf = pao2 / (fio2 / 100);
+                let severity = '';
+                if (pf >= 300) severity = 'Normal';
+                else if (pf >= 200) severity = 'Mild ARDS';
+                else if (pf >= 100) severity = 'Moderate ARDS';
+                else severity = 'Severe ARDS';
+                
+                document.getElementById('pf-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        P/F Ratio: ${pf.toFixed(0)}<br>
+                        <span class="text-xs text-gray-500">${severity}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateAaGradient() {
+            const fio2 = parseFloat(document.getElementById('fio2-aa').value);
+            const pao2 = parseFloat(document.getElementById('pao2-aa').value);
+            const paco2 = parseFloat(document.getElementById('paco2-aa').value);
+            
+            if (fio2 && pao2 && paco2) {
+                const pao2_alveolar = ((fio2 / 100) * (760 - 47)) - (paco2 / 0.8);
+                const aaGradient = pao2_alveolar - pao2;
+                
+                document.getElementById('aa-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        A-a Gradient: ${aaGradient.toFixed(0)} mmHg<br>
+                        <span class="text-xs text-gray-500">Normal: <15 mmHg (room air)</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateTidalVolume() {
+            const weight = parseFloat(document.getElementById('weight-tv').value);
+            const gender = document.getElementById('gender-tv').value;
+            const height = parseFloat(document.getElementById('height-tv').value);
+            
+            if (weight && height) {
+                let ibw;
+                if (gender === 'male') {
+                    ibw = 50 + 2.3 * ((height / 2.54) - 60);
+                } else {
+                    ibw = 45.5 + 2.3 * ((height / 2.54) - 60);
+                }
+                
+                const tv_low = ibw * 6;
+                const tv_high = ibw * 8;
+                
+                document.getElementById('tv-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        IBW: ${ibw.toFixed(1)} kg<br>
+                        Tidal Volume: ${tv_low.toFixed(0)}-${tv_high.toFixed(0)} mL<br>
+                        <span class="text-xs text-gray-500">6-8 mL/kg IBW for ARDS</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateCCr() {
+            const age = parseFloat(document.getElementById('age-ccr').value);
+            const weight = parseFloat(document.getElementById('weight-ccr').value);
+            const scr = parseFloat(document.getElementById('scr-ccr').value);
+            const gender = document.getElementById('gender-ccr').value;
+            
+            if (age && weight && scr) {
+                let ccr = ((140 - age) * weight) / (72 * scr);
+                if (gender === 'female') {
+                    ccr *= 0.85;
+                }
+                
+                document.getElementById('ccr-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        Creatinine Clearance: ${ccr.toFixed(0)} mL/min<br>
+                        <span class="text-xs text-gray-500">Normal: >90 mL/min</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateFeNa() {
+            const urineNa = parseFloat(document.getElementById('urine-na').value);
+            const serumNa = parseFloat(document.getElementById('serum-na').value);
+            const urineCr = parseFloat(document.getElementById('urine-cr').value);
+            const serumCr = parseFloat(document.getElementById('serum-cr').value);
+            
+            if (urineNa && serumNa && urineCr && serumCr) {
+                const fena = ((urineNa / serumNa) / (urineCr / serumCr)) * 100;
+                let interpretation = '';
+                if (fena < 1) interpretation = 'Pre-renal';
+                else if (fena > 2) interpretation = 'Intrinsic renal';
+                else interpretation = 'Indeterminate';
+                
+                document.getElementById('fena-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        FeNa: ${fena.toFixed(1)}%<br>
+                        <span class="text-xs text-gray-500">${interpretation}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateAnionGap() {
+            const na = parseFloat(document.getElementById('na-ag').value);
+            const cl = parseFloat(document.getElementById('cl-ag').value);
+            const hco3 = parseFloat(document.getElementById('hco3-ag').value);
+            
+            if (na && cl && hco3) {
+                const ag = na - (cl + hco3);
+                let interpretation = '';
+                if (ag > 12) interpretation = 'High anion gap';
+                else if (ag < 8) interpretation = 'Low anion gap';
+                else interpretation = 'Normal';
+                
+                document.getElementById('ag-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        Anion Gap: ${ag.toFixed(0)} mEq/L<br>
+                        <span class="text-xs text-gray-500">${interpretation} (Normal: 8-12)</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateGCS() {
+            const eye = parseInt(document.getElementById('eye-gcs').value);
+            const verbal = parseInt(document.getElementById('verbal-gcs').value);
+            const motor = parseInt(document.getElementById('motor-gcs').value);
+            
+            const total = eye + verbal + motor;
+            let severity = '';
+            if (total >= 13) severity = 'Mild TBI';
+            else if (total >= 9) severity = 'Moderate TBI';
+            else severity = 'Severe TBI';
+            
+            document.getElementById('gcs-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    GCS: ${total}/15 (E${eye}V${verbal}M${motor})<br>
+                    <span class="text-xs text-gray-500">${severity}</span>
+                </div>
+            `;
+        }
+
+        function showRASSResult() {
+            const score = parseInt(document.getElementById('rass-score').value);
+            const descriptions = {
+                4: 'Combative - Overtly combative, violent, immediate danger to staff',
+                3: 'Very agitated - Pulls or removes tube(s) or catheter(s); aggressive',
+                2: 'Agitated - Frequent non-purposeful movement, fights ventilator',
+                1: 'Restless - Anxious but movements not aggressive vigorous',
+                0: 'Alert and calm - Spontaneously pays attention to caregiver',
+                '-1': 'Drowsy - Not fully alert, but has sustained awakening to voice',
+                '-2': 'Light sedation - Briefly awakens to voice with eye contact',
+                '-3': 'Moderate sedation - Movement or eye opening to voice',
+                '-4': 'Deep sedation - No response to voice, but movement to physical stimulation',
+                '-5': 'Unarousable - No response to voice or physical stimulation'
+            };
+            
+            document.getElementById('rass-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    RASS: ${score > 0 ? '+' : ''}${score}<br>
+                    <span class="text-xs text-gray-500">${descriptions[score]}</span>
+                </div>
+            `;
+        }
+
+        function calculateSOFA() {
+            const resp = parseInt(document.getElementById('resp-sofa').value);
+            const coag = parseInt(document.getElementById('coag-sofa').value);
+            const liver = parseInt(document.getElementById('liver-sofa').value);
+            
+            const total = resp + coag + liver;
+            
+            document.getElementById('sofa-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    SOFA Score: ${total}/12<br>
+                    <span class="text-xs text-gray-500">Higher scores indicate greater organ dysfunction</span>
+                </div>
+            `;
+        }
+
+        function calculateBSA() {
+            const height = parseFloat(document.getElementById('height-bsa').value);
+            const weight = parseFloat(document.getElementById('weight-bsa').value);
+            
+            if (height && weight) {
+                const bsa = Math.sqrt((height * weight) / 3600);
+                
+                document.getElementById('bsa-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        BSA: ${bsa.toFixed(2)} m²<br>
+                        <span class="text-xs text-gray-500">Mosteller formula</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateIBW() {
+            const height = parseFloat(document.getElementById('height-ibw').value);
+            const gender = document.getElementById('gender-ibw').value;
+            
+            if (height) {
+                let ibw;
+                if (gender === 'male') {
+                    ibw = 50 + 2.3 * ((height / 2.54) - 60);
+                } else {
+                    ibw = 45.5 + 2.3 * ((height / 2.54) - 60);
+                }
+                
+                document.getElementById('ibw-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        IBW: ${ibw.toFixed(1)} kg<br>
+                        <span class="text-xs text-gray-500">Devine formula</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateCalories() {
+            const age = parseFloat(document.getElementById('age-cal').value);
+            const weight = parseFloat(document.getElementById('weight-cal').value);
+            const height = parseFloat(document.getElementById('height-cal').value);
+            const gender = document.getElementById('gender-cal').value;
+            
+            if (age && weight && height) {
+                let bmr;
+                if (gender === 'male') {
+                    bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+                } else {
+                    bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+                }
+                
+                const stressed = bmr * 1.3; // Stress factor for ICU patients
+                
+                document.getElementById('cal-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        BMR: ${bmr.toFixed(0)} kcal/day<br>
+                        ICU needs: ${stressed.toFixed(0)} kcal/day<br>
+                        <span class="text-xs text-gray-500">With stress factor 1.3</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateNaCorrection() {
+            const currentNa = parseFloat(document.getElementById('current-na').value);
+            const targetNa = parseFloat(document.getElementById('target-na').value);
+            const weight = parseFloat(document.getElementById('weight-na').value);
+            const gender = document.getElementById('gender-na').value;
+            
+            if (currentNa && targetNa && weight) {
+                const tbw = weight * (gender === 'male' ? 0.6 : 0.5);
+                const deficit = (targetNa - currentNa) * tbw;
+                
+                document.getElementById('na-correction-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        TBW: ${tbw.toFixed(1)} L<br>
+                        Na⁺ deficit: ${deficit.toFixed(0)} mEq<br>
+                        <span class="text-xs text-gray-500">Correct slowly: 0.5-1 mEq/L/hr</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateOsmolality() {
+            const na = parseFloat(document.getElementById('na-osm').value);
+            const bun = parseFloat(document.getElementById('bun-osm').value);
+            const glucose = parseFloat(document.getElementById('glucose-osm').value);
+            
+            if (na && bun && glucose) {
+                const osm = (2 * na) + (bun / 2.8) + (glucose / 18);
+                
+                document.getElementById('osm-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        Osmolality: ${osm.toFixed(0)} mOsm/kg<br>
+                        <span class="text-xs text-gray-500">Normal: 275-295 mOsm/kg</span>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateCorrectedCalcium() {
+            const totalCa = parseFloat(document.getElementById('total-ca').value);
+            const albumin = parseFloat(document.getElementById('albumin-ca').value);
+            
+            if (totalCa && albumin) {
+                const correctedCa = totalCa + 0.8 * (4.0 - albumin);
+                
+                document.getElementById('ca-result').innerHTML = `
+                    <div class="text-green-600 dark:text-green-400">
+                        Corrected Ca²⁺: ${correctedCa.toFixed(1)} mg/dL<br>
+                        <span class="text-xs text-gray-500">Normal: 8.5-10.5 mg/dL</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Preoperative Risk Calculator Functions
+        function calculateRCRI() {
+            let score = 0;
+            if (document.getElementById('rcri-surgery').checked) score++;
+            if (document.getElementById('rcri-cad').checked) score++;
+            if (document.getElementById('rcri-chf').checked) score++;
+            if (document.getElementById('rcri-cvd').checked) score++;
+            if (document.getElementById('rcri-insulin').checked) score++;
+            if (document.getElementById('rcri-creatinine').checked) score++;
+            
+            let risk = '';
+            let mortality = '';
+            if (score === 0) {
+                risk = 'Class I (Low)';
+                mortality = '0.4% cardiac events';
+            } else if (score === 1) {
+                risk = 'Class II (Intermediate)';
+                mortality = '0.9% cardiac events';
+            } else if (score === 2) {
+                risk = 'Class III (Intermediate)';
+                mortality = '6.6% cardiac events';
+            } else {
+                risk = 'Class IV (High)';
+                mortality = '≥11% cardiac events';
+            }
+            
+            document.getElementById('rcri-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    RCRI Score: ${score}/6<br>
+                    Risk: ${risk}<br>
+                    <span class="text-xs text-gray-500">${mortality}</span>
+                </div>
+            `;
+        }
+
+        function showASAResult() {
+            const asaClass = parseInt(document.getElementById('asa-class').value);
+            const emergency = document.getElementById('asa-emergency').checked;
+            
+            const riskLevels = {
+                1: { mortality: '0.05-0.1%', description: 'Minimal risk' },
+                2: { mortality: '0.1-0.2%', description: 'Low risk' },
+                3: { mortality: '0.4-1.8%', description: 'Moderate risk' },
+                4: { mortality: '7.8-23%', description: 'High risk' },
+                5: { mortality: '50%+', description: 'Very high risk' },
+                6: { mortality: 'N/A', description: 'Organ procurement' }
+            };
+            
+            const emergencyText = emergency ? ' (Emergency +E)' : '';
+            const currentRisk = riskLevels[asaClass];
+            
+            document.getElementById('asa-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    ASA ${asaClass}${emergencyText}<br>
+                    ${currentRisk.description}<br>
+                    <span class="text-xs text-gray-500">Mortality: ${currentRisk.mortality}</span>
+                </div>
+            `;
+        }
+
+        function showMETSResult() {
+            const metsLevel = parseInt(document.getElementById('mets-level').value);
+            
+            let risk = '';
+            let recommendation = '';
+            
+            if (metsLevel >= 10) {
+                risk = 'Low surgical risk';
+                recommendation = 'Proceed without further testing';
+            } else if (metsLevel >= 7) {
+                risk = 'Low-Moderate surgical risk';
+                recommendation = 'Consider stress testing if >2 RCRI factors';
+            } else if (metsLevel >= 4) {
+                risk = 'Moderate surgical risk';
+                recommendation = 'Consider stress testing if ≥1 RCRI factors';
+            } else {
+                risk = 'Poor functional capacity';
+                recommendation = 'Consider cardiology consultation';
+            }
+            
+            document.getElementById('mets-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Functional Capacity: ${metsLevel} METS<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculateBleedingRisk() {
+            let riskFactors = 0;
+            if (document.getElementById('bleed-anticoag').checked) riskFactors++;
+            if (document.getElementById('bleed-plt').checked) riskFactors++;
+            if (document.getElementById('bleed-liver').checked) riskFactors++;
+            if (document.getElementById('bleed-renal').checked) riskFactors++;
+            if (document.getElementById('bleed-prior').checked) riskFactors++;
+            
+            let risk = '';
+            let recommendation = '';
+            
+            if (riskFactors === 0) {
+                risk = 'Low bleeding risk';
+                recommendation = 'Standard perioperative management';
+            } else if (riskFactors <= 2) {
+                risk = 'Moderate bleeding risk';
+                recommendation = 'Consider hematology consultation';
+            } else {
+                risk = 'High bleeding risk';
+                recommendation = 'Hematology consultation recommended';
+            }
+            
+            document.getElementById('bleeding-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Risk Factors: ${riskFactors}/5<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculatePulmonaryRisk() {
+            let riskFactors = 0;
+            if (document.getElementById('pulm-copd').checked) riskFactors++;
+            if (document.getElementById('pulm-smoking').checked) riskFactors++;
+            if (document.getElementById('pulm-upper').checked) riskFactors++;
+            if (document.getElementById('pulm-duration').checked) riskFactors++;
+            if (document.getElementById('pulm-age').checked) riskFactors++;
+            
+            let risk = '';
+            let recommendation = '';
+            
+            if (riskFactors === 0) {
+                risk = 'Low pulmonary risk';
+                recommendation = 'Standard management';
+            } else if (riskFactors <= 2) {
+                risk = 'Moderate pulmonary risk';
+                recommendation = 'Consider spirometry, optimize bronchodilators';
+            } else {
+                risk = 'High pulmonary risk';
+                recommendation = 'Pulmonology consultation, aggressive optimization';
+            }
+            
+            document.getElementById('pulmonary-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Risk Factors: ${riskFactors}/5<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculateVTERisk() {
+            let score = parseInt(document.getElementById('vte-age').value);
+            
+            // Add points from checkboxes
+            document.querySelectorAll('#preop input[type="checkbox"][data-points]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    score += parseInt(checkbox.dataset.points);
+                }
+            });
+            
+            let risk = '';
+            let recommendation = '';
+            
+            if (score < 2) {
+                risk = 'Low risk';
+                recommendation = 'Ambulation only';
+            } else if (score <= 4) {
+                risk = 'Moderate risk';
+                recommendation = 'Mechanical prophylaxis';
+            } else if (score <= 6) {
+                risk = 'High risk';
+                recommendation = 'Mechanical + pharmacologic prophylaxis';
+            } else {
+                risk = 'Very high risk';
+                recommendation = 'Extended prophylaxis + consider IVC filter';
+            }
+            
+            document.getElementById('vte-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Caprini Score: ${score}<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        // Additional Scoring System Functions
+        function calculateFullSOFA() {
+            const resp = parseInt(document.getElementById('resp-sofa').value);
+            const cardio = parseInt(document.getElementById('cardio-sofa').value);
+            const cns = parseInt(document.getElementById('cns-sofa').value);
+            const renal = parseInt(document.getElementById('renal-sofa').value);
+            
+            // For liver, we'll use the coagulation selector (platelets)
+            const coag = parseInt(document.getElementById('coag-sofa').value);
+            
+            const total = resp + cardio + cns + renal + coag;
+            
+            let mortality = '';
+            if (total <= 6) mortality = '<10% mortality';
+            else if (total <= 9) mortality = '15-20% mortality';
+            else if (total <= 12) mortality = '40-50% mortality';
+            else mortality = '>80% mortality';
+            
+            document.getElementById('full-sofa-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    SOFA Score: ${total}/24<br>
+                    <span class="text-xs text-gray-500">${mortality}</span>
+                </div>
+            `;
+        }
+
+        function calculateAPACHE() {
+            const age = parseFloat(document.getElementById('apache-age').value);
+            const temp = parseFloat(document.getElementById('apache-temp').value);
+            const hr = parseFloat(document.getElementById('apache-hr').value);
+            const map = parseFloat(document.getElementById('apache-map').value);
+            const rr = parseFloat(document.getElementById('apache-rr').value);
+            const gcs = parseFloat(document.getElementById('apache-gcs').value);
+            
+            if (!age || !temp || !hr || !map || !rr || !gcs) return;
+            
+            let score = 0;
+            
+            // Age points
+            if (age >= 75) score += 6;
+            else if (age >= 65) score += 5;
+            else if (age >= 55) score += 3;
+            else if (age >= 45) score += 2;
+            
+            // Temperature
+            if (temp >= 41 || temp <= 29.9) score += 4;
+            else if (temp >= 39 || temp <= 31.9) score += 3;
+            else if (temp >= 38.5 || temp <= 33.9) score += 1;
+            
+            // Heart Rate
+            if (hr >= 180 || hr <= 39) score += 4;
+            else if (hr >= 140 || hr <= 54) score += 3;
+            else if (hr >= 110 || hr <= 69) score += 2;
+            
+            // MAP
+            if (map >= 160 || map <= 49) score += 4;
+            else if (map >= 130 || map <= 69) score += 2;
+            
+            // Respiratory Rate
+            if (rr >= 50 || rr <= 5) score += 4;
+            else if (rr >= 35 || rr <= 9) score += 3;
+            else if (rr >= 25 || rr <= 11) score += 1;
+            
+            // GCS (inverted - lower GCS = higher points)
+            if (gcs <= 6) score += 12;
+            else if (gcs <= 9) score += 8;
+            else if (gcs <= 12) score += 5;
+            else if (gcs <= 14) score += 3;
+            
+            let mortality = '';
+            if (score <= 4) mortality = '<4% mortality';
+            else if (score <= 9) mortality = '4-8% mortality';
+            else if (score <= 14) mortality = '8-15% mortality';
+            else if (score <= 19) mortality = '15-25% mortality';
+            else if (score <= 24) mortality = '25-40% mortality';
+            else if (score <= 29) mortality = '40-55% mortality';
+            else if (score <= 34) mortality = '55-75% mortality';
+            else mortality = '>75% mortality';
+            
+            document.getElementById('apache-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    APACHE II: ${score}<br>
+                    <span class="text-xs text-gray-500">${mortality}</span>
+                </div>
+            `;
+        }
+
+        function calculateqSOFA() {
+            let score = 0;
+            if (document.getElementById('qsofa-sbp').checked) score++;
+            if (document.getElementById('qsofa-rr').checked) score++;
+            if (document.getElementById('qsofa-mental').checked) score++;
+            
+            let risk = '';
+            if (score >= 2) {
+                risk = 'High risk for sepsis';
+            } else {
+                risk = 'Low risk for sepsis';
+            }
+            
+            document.getElementById('qsofa-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    qSOFA: ${score}/3<br>
+                    <span class="text-xs text-gray-500">${risk}</span>
+                </div>
+            `;
+        }
+
+        function calculateNEWS() {
+            const rr = parseInt(document.getElementById('news-rr').value);
+            const spo2 = parseInt(document.getElementById('news-spo2').value);
+            const temp = parseInt(document.getElementById('news-temp').value);
+            const sbp = parseInt(document.getElementById('news-sbp').value);
+            const hr = parseInt(document.getElementById('news-hr').value);
+            const conscious = parseInt(document.getElementById('news-conscious').value);
+            
+            const total = rr + spo2 + temp + sbp + hr + conscious;
+            
+            let risk = '';
+            let action = '';
+            
+            if (total === 0) {
+                risk = 'Low risk';
+                action = 'Continue routine monitoring';
+            } else if (total <= 4) {
+                risk = 'Low-medium risk';
+                action = 'Increase monitoring frequency';
+            } else if (total <= 6) {
+                risk = 'Medium risk';
+                action = 'Urgent response required';
+            } else {
+                risk = 'High risk';
+                action = 'Emergency response required';
+            }
+            
+            document.getElementById('news-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    NEWS: ${total}<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${action}</span>
+                </div>
+            `;
+        }
+
+        function calculateCURB65() {
+            let score = 0;
+            if (document.getElementById('curb-confusion').checked) score++;
+            if (document.getElementById('curb-urea').checked) score++;
+            if (document.getElementById('curb-rr').checked) score++;
+            if (document.getElementById('curb-bp').checked) score++;
+            if (document.getElementById('curb-age').checked) score++;
+            
+            let risk = '';
+            let recommendation = '';
+            
+            if (score <= 1) {
+                risk = 'Low severity';
+                recommendation = 'Outpatient treatment';
+            } else if (score === 2) {
+                risk = 'Moderate severity';
+                recommendation = 'Consider hospitalization';
+            } else {
+                risk = 'High severity';
+                recommendation = 'Hospital admission required';
+            }
+            
+            document.getElementById('curb65-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    CURB-65: ${score}/5<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculateWellsDVT() {
+            let score = 0;
+            
+            // Calculate score from checkboxes with data-points
+            document.querySelectorAll('#scoring input[id^="wells-"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    const points = parseInt(checkbox.dataset.points);
+                    score += points;
+                }
+            });
+            
+            let probability = '';
+            let recommendation = '';
+            
+            if (score <= 0) {
+                probability = 'Low probability (5%)';
+                recommendation = 'D-dimer test';
+            } else if (score <= 2) {
+                probability = 'Moderate probability (17%)';
+                recommendation = 'D-dimer or ultrasound';
+            } else {
+                probability = 'High probability (53%)';
+                recommendation = 'Ultrasound recommended';
+            }
+            
+            document.getElementById('wells-dvt-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Wells Score: ${score}<br>
+                    ${probability}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculateCHADS2VASc() {
+            let score = 0;
+            
+            // Calculate score from checkboxes with data-points
+            document.querySelectorAll('#scoring input[id^="chads-"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    const points = parseInt(checkbox.dataset.points);
+                    score += points;
+                }
+            });
+            
+            let risk = '';
+            let recommendation = '';
+            
+            if (score === 0) {
+                risk = 'Low risk (0% stroke/year)';
+                recommendation = 'No anticoagulation';
+            } else if (score === 1) {
+                risk = 'Low-moderate risk (1.3% stroke/year)';
+                recommendation = 'Consider anticoagulation';
+            } else if (score === 2) {
+                risk = 'Moderate risk (2.2% stroke/year)';
+                recommendation = 'Anticoagulation recommended';
+            } else {
+                risk = 'High risk (>3.2% stroke/year)';
+                recommendation = 'Anticoagulation strongly recommended';
+            }
+            
+            document.getElementById('chads-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    CHA₂DS₂-VASc: ${score}<br>
+                    ${risk}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        // New Delirium/Sedation Functions
+        function calculateCAMICU() {
+            const acute = document.getElementById('cam-acute').value;
+            const inattention = document.getElementById('cam-inattention').value;
+            const consciousness = document.getElementById('cam-consciousness').value;
+            const thinking = document.getElementById('cam-thinking').value;
+            
+            // CAM-ICU algorithm: 1 AND 2 AND (3A OR 3B)
+            const hasDelirium = (acute === 'present') && 
+                                (inattention === 'present') && 
+                                ((consciousness === 'present') || (thinking === 'present'));
+            
+            document.getElementById('cam-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    CAM-ICU: ${hasDelirium ? 'POSITIVE' : 'NEGATIVE'}<br>
+                    <span class="text-xs text-gray-500">${hasDelirium ? 'Delirium present' : 'No delirium detected'}</span>
+                </div>
+            `;
+        }
+
+        function calculateICDSC() {
+            let score = 0;
+            
+            // Calculate score from checkboxes
+            document.querySelectorAll('#delirium input[id^="icdsc-"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    score += parseInt(checkbox.dataset.points);
+                }
+            });
+            
+            let interpretation = '';
+            if (score === 0) {
+                interpretation = 'No delirium';
+            } else if (score <= 3) {
+                interpretation = 'Subsyndromal delirium';
+            } else {
+                interpretation = 'Delirium';
+            }
+            
+            document.getElementById('icdsc-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    ICDSC: ${score}/8<br>
+                    <span class="text-xs text-gray-500">${interpretation}</span>
+                </div>
+            `;
+        }
+
+        function showSASResult() {
+            const level = parseInt(document.getElementById('sas-level').value);
+            const descriptions = {
+                7: 'Dangerous agitation - Pulling at ET tube, trying to remove catheters, climbing over bedrail, striking at staff, thrashing side-to-side',
+                6: 'Very agitated - Does not calm despite frequent verbal reminding of limits, requires physical restraints, biting ET tube',
+                5: 'Agitated - Anxious or mildly agitated, attempting to sit up, calms down to verbal instructions',
+                4: 'Calm and cooperative - Calm, awakens easily, follows commands',
+                3: 'Sedated - Difficult to arouse, awakens to verbal stimuli or gentle shaking but drifts off again, follows simple commands',
+                2: 'Very sedated - Arouses to physical stimuli but does not communicate or follow commands, may move spontaneously',
+                1: 'Unarousable - Minimal or no response to noxious stimuli, does not communicate or follow commands'
+            };
+            
+            document.getElementById('sas-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    SAS Level: ${level}<br>
+                    <span class="text-xs text-gray-500">${descriptions[level]}</span>
+                </div>
+            `;
+        }
+
+        function calculateSIRS() {
+            let criteria = 0;
+            if (document.getElementById('sirs-temp').checked) criteria++;
+            if (document.getElementById('sirs-hr').checked) criteria++;
+            if (document.getElementById('sirs-rr').checked) criteria++;
+            if (document.getElementById('sirs-wbc').checked) criteria++;
+            
+            let interpretation = '';
+            if (criteria < 2) {
+                interpretation = 'No SIRS';
+            } else if (criteria >= 2) {
+                interpretation = 'SIRS present';
+            }
+            
+            document.getElementById('sirs-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    SIRS Criteria: ${criteria}/4<br>
+                    <span class="text-xs text-gray-500">${interpretation}</span>
+                </div>
+            `;
+        }
+
+        // Specialized Scores Functions
+        function calculateSAPS2() {
+            const age = parseFloat(document.getElementById('saps-age').value);
+            const hr = parseFloat(document.getElementById('saps-hr').value);
+            const sbp = parseFloat(document.getElementById('saps-sbp').value);
+            const temp = parseFloat(document.getElementById('saps-temp').value);
+            const gcs = parseFloat(document.getElementById('saps-gcs').value);
+            
+            if (!age || !hr || !sbp || !temp || !gcs) return;
+            
+            let score = 0;
+            
+            // Age points (simplified)
+            if (age >= 80) score += 18;
+            else if (age >= 70) score += 15;
+            else if (age >= 60) score += 12;
+            else if (age >= 50) score += 9;
+            else if (age >= 40) score += 7;
+            
+            // Heart Rate
+            if (hr >= 160 || hr <= 39) score += 11;
+            else if (hr >= 120 || hr <= 69) score += 2;
+            
+            // Systolic BP
+            if (sbp >= 200 || sbp <= 69) score += 13;
+            else if (sbp >= 160 || sbp <= 99) score += 5;
+            
+            // Temperature
+            if (temp >= 39 || temp <= 36) score += 3;
+            
+            // GCS (simplified)
+            if (gcs <= 8) score += 26;
+            else if (gcs <= 10) score += 13;
+            else if (gcs <= 13) score += 7;
+            
+            let mortality = '';
+            if (score <= 29) mortality = '<10% mortality';
+            else if (score <= 40) mortality = '10-25% mortality';
+            else if (score <= 52) mortality = '25-50% mortality';
+            else if (score <= 77) mortality = '50-75% mortality';
+            else mortality = '>75% mortality';
+            
+            document.getElementById('saps-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    SAPS II: ${score}<br>
+                    <span class="text-xs text-gray-500">${mortality}</span>
+                </div>
+            `;
+        }
+
+        function calculateWellsPE() {
+            let score = 0;
+            
+            // Calculate score from checkboxes
+            document.querySelectorAll('#specialized input[id^="wells-pe-"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    const points = parseFloat(checkbox.dataset.points);
+                    score += points;
+                }
+            });
+            
+            let probability = '';
+            let recommendation = '';
+            
+            if (score <= 4) {
+                probability = 'Low probability (12%)';
+                recommendation = 'D-dimer test';
+            } else if (score <= 6) {
+                probability = 'Moderate probability (30%)';
+                recommendation = 'Consider CT-PA or D-dimer';
+            } else {
+                probability = 'High probability (78%)';
+                recommendation = 'CT-PA recommended';
+            }
+            
+            document.getElementById('wells-pe-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Wells PE Score: ${score.toFixed(1)}<br>
+                    ${probability}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculateHEART() {
+            const history = parseInt(document.getElementById('heart-history').value);
+            const ecg = parseInt(document.getElementById('heart-ecg').value);
+            const age = parseInt(document.getElementById('heart-age').value);
+            const risk = parseInt(document.getElementById('heart-risk').value);
+            const troponin = parseInt(document.getElementById('heart-troponin').value);
+            
+            const total = history + ecg + age + risk + troponin;
+            
+            let riskLevel = '';
+            let recommendation = '';
+            
+            if (total <= 3) {
+                riskLevel = 'Low risk (0.9-1.7%)';
+                recommendation = 'Safe for discharge';
+            } else if (total <= 6) {
+                riskLevel = 'Moderate risk (12-16.6%)';
+                recommendation = 'Consider further evaluation';
+            } else {
+                riskLevel = 'High risk (50-65%)';
+                recommendation = 'Urgent cardiology evaluation';
+            }
+            
+            document.getElementById('heart-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    HEART Score: ${total}/10<br>
+                    ${riskLevel}<br>
+                    <span class="text-xs text-gray-500">${recommendation}</span>
+                </div>
+            `;
+        }
+
+        function calculateChildPugh() {
+            const bilirubin = parseInt(document.getElementById('child-bilirubin').value);
+            const albumin = parseInt(document.getElementById('child-albumin').value);
+            const pt = parseInt(document.getElementById('child-pt').value);
+            const ascites = parseInt(document.getElementById('child-ascites').value);
+            const enceph = parseInt(document.getElementById('child-enceph').value);
+            
+            const total = bilirubin + albumin + pt + ascites + enceph;
+            
+            let childClass = '';
+            let survival = '';
+            
+            if (total <= 6) {
+                childClass = 'Child-Pugh A';
+                survival = '100% 1-year, 85% 2-year survival';
+            } else if (total <= 9) {
+                childClass = 'Child-Pugh B';
+                survival = '81% 1-year, 57% 2-year survival';
+            } else {
+                childClass = 'Child-Pugh C';
+                survival = '45% 1-year, 35% 2-year survival';
+            }
+            
+            document.getElementById('child-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    Score: ${total}/15<br>
+                    ${childClass}<br>
+                    <span class="text-xs text-gray-500">${survival}</span>
+                </div>
+            `;
+        }
+
+        function calculateMELD() {
+            const bilirubin = parseFloat(document.getElementById('meld-bilirubin').value);
+            const creatinine = parseFloat(document.getElementById('meld-creatinine').value);
+            const inr = parseFloat(document.getElementById('meld-inr').value);
+            const dialysis = document.getElementById('meld-dialysis').checked;
+            
+            if (!bilirubin || !creatinine || !inr) return;
+            
+            // Ensure minimum values
+            const bili = Math.max(bilirubin, 1.0);
+            let creat = Math.max(creatinine, 1.0);
+            const inrVal = Math.max(inr, 1.0);
+            
+            // If on dialysis, creatinine is set to 4.0
+            if (dialysis) {
+                creat = 4.0;
+            }
+            
+            // MELD Score calculation
+            const meld = Math.round(3.78 * Math.log(bili) + 11.2 * Math.log(inrVal) + 9.57 * Math.log(creat) + 6.43);
+            const finalMeld = Math.min(Math.max(meld, 6), 40); // Cap between 6-40
+            
+            let mortality = '';
+            if (finalMeld <= 9) mortality = '<4% 3-month mortality';
+            else if (finalMeld <= 19) mortality = '6-20% 3-month mortality';
+            else if (finalMeld <= 29) mortality = '20-45% 3-month mortality';
+            else if (finalMeld <= 39) mortality = '45-70% 3-month mortality';
+            else mortality = '>70% 3-month mortality';
+            
+            document.getElementById('meld-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    MELD Score: ${finalMeld}<br>
+                    <span class="text-xs text-gray-500">${mortality}</span>
+                </div>
+            `;
+        }
+
+        function calculateDIC() {
+            const platelets = parseInt(document.getElementById('dic-platelets').value);
+            const ddimer = parseInt(document.getElementById('dic-ddimer').value);
+            const pt = parseInt(document.getElementById('dic-pt').value);
+            const fibrinogen = parseInt(document.getElementById('dic-fibrinogen').value);
+            
+            const total = platelets + ddimer + pt + fibrinogen;
+            
+            let interpretation = '';
+            if (total < 5) {
+                interpretation = 'Not suggestive of DIC';
+            } else {
+                interpretation = 'Compatible with overt DIC';
+            }
+            
+            document.getElementById('dic-result').innerHTML = `
+                <div class="text-green-600 dark:text-green-400">
+                    DIC Score: ${total}/8<br>
+                    <span class="text-xs text-gray-500">${interpretation}</span>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
