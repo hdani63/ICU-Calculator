@@ -3,11 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ICU Calculator">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%235D5CDE'/><text y='65' x='50' fill='white' text-anchor='middle' font-size='60'>🏥</text></svg>">
     <title>ICU Calculator Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -42,6 +37,7 @@
             <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="preop">Preoperative Risk</button>
             <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="delirium">Delirium/Sedation</button>
             <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="specialized">Specialized Scores</button>
+            <button class="tab-btn px-4 py-2 text-base font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-tab="anesthesia">Anesthetic Medications</button>
         </div>
 
         <!-- Calculator Sections -->
@@ -1064,6 +1060,469 @@
                         </div>
                         <button onclick="calculateSIRS()" class="w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">Calculate</button>
                         <div id="sirs-result" class="text-sm font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anesthetic Medications Tab -->
+        <div id="anesthesia" class="tab-content hidden">
+            <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h2 class="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-2">Patient Information</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                        <input type="number" id="patient-weight" class="w-full px-3 py-2 text-base border border-blue-300 dark:border-blue-600 rounded-md dark:bg-gray-700" placeholder="70" oninput="updateAllDoses()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Age</label>
+                        <input type="number" id="patient-age" class="w-full px-3 py-2 text-base border border-blue-300 dark:border-blue-600 rounded-md dark:bg-gray-700" placeholder="30" oninput="updateAllDoses()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Age Group</label>
+                        <select id="age-group" class="w-full px-3 py-2 text-base border border-blue-300 dark:border-blue-600 rounded-md dark:bg-gray-700" onchange="updateAllDoses()">
+                            <option value="neonate">Neonate (0-1 month)</option>
+                            <option value="infant">Infant (1-12 months)</option>
+                            <option value="toddler">Toddler (1-3 years)</option>
+                            <option value="preschool">Preschool (3-6 years)</option>
+                            <option value="school">School age (6-12 years)</option>
+                            <option value="adolescent">Adolescent (12-18 years)</option>
+                            <option value="adult" selected>Adult (18-65 years)</option>
+                            <option value="elderly">Elderly (>65 years)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medication Categories -->
+            <div class="space-y-6">
+                <!-- Intravenous Anesthetics -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">I. Intravenous Anesthetics (Induction Agents)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Propofol -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Propofol</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Induction:</strong> <span id="propofol-induction">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="propofol-maintenance">-</span></div>
+                                <div><strong>Sedation:</strong> <span id="propofol-sedation">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">IV injection, may cause pain on injection</div>
+                            </div>
+                        </div>
+
+                        <!-- Ketamine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Ketamine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Induction IV:</strong> <span id="ketamine-induction">-</span></div>
+                                <div><strong>Induction IM:</strong> <span id="ketamine-im">-</span></div>
+                                <div><strong>Analgesic dose:</strong> <span id="ketamine-analgesic">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Dissociative anesthetic, preserves airway reflexes</div>
+                            </div>
+                        </div>
+
+                        <!-- Etomidate -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Etomidate</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Induction:</strong> <span id="etomidate-induction">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Hemodynamically stable, adrenal suppression risk</div>
+                            </div>
+                        </div>
+
+                        <!-- Dexmedetomidine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Dexmedetomidine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Loading dose:</strong> <span id="dexmed-loading">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="dexmed-maintenance">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">α2-agonist, conscious sedation, no respiratory depression</div>
+                            </div>
+                        </div>
+
+                        <!-- Thiopental -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Thiopental</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Induction:</strong> <span id="thiopental-induction">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Barbiturate, cardiopressant, avoid in hypovolemia</div>
+                            </div>
+                        </div>
+
+                        <!-- Remimazolam -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Remimazolam</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Induction:</strong> <span id="remimazolam-induction">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="remimazolam-maintenance">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Ultra-short acting benzodiazepine</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opioid Analgesics -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-red-700 dark:text-red-400">II. Opioid Analgesics</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Fentanyl -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Fentanyl</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Bolus:</strong> <span id="fentanyl-bolus">-</span></div>
+                                <div><strong>Infusion:</strong> <span id="fentanyl-infusion">-</span></div>
+                                <div><strong>Epidural:</strong> <span id="fentanyl-epidural">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Potent, rapid onset, 30-60 min duration</div>
+                            </div>
+                        </div>
+
+                        <!-- Morphine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Morphine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>IV bolus:</strong> <span id="morphine-bolus">-</span></div>
+                                <div><strong>IM/SC:</strong> <span id="morphine-im">-</span></div>
+                                <div><strong>Epidural:</strong> <span id="morphine-epidural">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Standard opioid, histamine release, long duration</div>
+                            </div>
+                        </div>
+
+                        <!-- Sufentanil -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Sufentanil</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Bolus:</strong> <span id="sufentanil-bolus">-</span></div>
+                                <div><strong>Infusion:</strong> <span id="sufentanil-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Very potent, cardiac surgery, epidural</div>
+                            </div>
+                        </div>
+
+                        <!-- Remifentanil -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Remifentanil</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Bolus:</strong> <span id="remifentanil-bolus">-</span></div>
+                                <div><strong>Infusion:</strong> <span id="remifentanil-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Ultra-short acting, organ-independent elimination</div>
+                            </div>
+                        </div>
+
+                        <!-- Hydromorphone -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Hydromorphone</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>IV bolus:</strong> <span id="hydromorphone-bolus">-</span></div>
+                                <div><strong>IM/SC:</strong> <span id="hydromorphone-im">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Potent, less histamine release than morphine</div>
+                            </div>
+                        </div>
+
+                        <!-- Tramadol -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Tramadol</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>IV/IM:</strong> <span id="tramadol-dose">-</span></div>
+                                <div><strong>Oral:</strong> <span id="tramadol-oral">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Multimodal action, SNRI activity</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Neuromuscular Blocking Agents -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-purple-700 dark:text-purple-400">III. Neuromuscular Blocking Agents</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Succinylcholine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Succinylcholine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>IV:</strong> <span id="succinylcholine-iv">-</span></div>
+                                <div><strong>IM:</strong> <span id="succinylcholine-im">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Depolarizing, rapid onset, short duration, many contraindications</div>
+                            </div>
+                        </div>
+
+                        <!-- Rocuronium -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Rocuronium</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Intubation:</strong> <span id="rocuronium-intubation">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="rocuronium-maintenance">-</span></div>
+                                <div><strong>RSI:</strong> <span id="rocuronium-rsi">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Non-depolarizing, fast onset, reversible with sugammadex</div>
+                            </div>
+                        </div>
+
+                        <!-- Vecuronium -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Vecuronium</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Intubation:</strong> <span id="vecuronium-intubation">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="vecuronium-maintenance">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Non-depolarizing, intermediate duration</div>
+                            </div>
+                        </div>
+
+                        <!-- Cisatracurium -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Cisatracurium</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Intubation:</strong> <span id="cisatracurium-intubation">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="cisatracurium-maintenance">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Organ-independent elimination, no histamine release</div>
+                            </div>
+                        </div>
+
+                        <!-- Atracurium -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Atracurium</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Intubation:</strong> <span id="atracurium-intubation">-</span></div>
+                                <div><strong>Maintenance:</strong> <span id="atracurium-maintenance">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Hoffman elimination, histamine release</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local Anesthetics -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-indigo-700 dark:text-indigo-400">IV. Local Anesthetics</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Lidocaine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Lidocaine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Local infiltration:</strong> <span id="lidocaine-local">-</span></div>
+                                <div><strong>Epidural:</strong> <span id="lidocaine-epidural">-</span></div>
+                                <div><strong>Spinal:</strong> <span id="lidocaine-spinal">-</span></div>
+                                <div><strong>Max safe dose:</strong> <span id="lidocaine-max">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Rapid onset, intermediate duration</div>
+                            </div>
+                        </div>
+
+                        <!-- Bupivacaine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Bupivacaine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Epidural:</strong> <span id="bupivacaine-epidural">-</span></div>
+                                <div><strong>Spinal:</strong> <span id="bupivacaine-spinal">-</span></div>
+                                <div><strong>Nerve block:</strong> <span id="bupivacaine-block">-</span></div>
+                                <div><strong>Max safe dose:</strong> <span id="bupivacaine-max">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Long duration, cardiotoxic</div>
+                            </div>
+                        </div>
+
+                        <!-- Ropivacaine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Ropivacaine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Epidural:</strong> <span id="ropivacaine-epidural">-</span></div>
+                                <div><strong>Nerve block:</strong> <span id="ropivacaine-block">-</span></div>
+                                <div><strong>Max safe dose:</strong> <span id="ropivacaine-max">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Less cardiotoxic than bupivacaine</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sedatives/Anxiolytics -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-yellow-700 dark:text-yellow-400">V. Sedatives/Anxiolytics</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Midazolam -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Midazolam</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Premedication:</strong> <span id="midazolam-premed">-</span></div>
+                                <div><strong>IV sedation:</strong> <span id="midazolam-sedation">-</span></div>
+                                <div><strong>Pediatric oral:</strong> <span id="midazolam-pediatric">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Short-acting benzodiazepine, reversible with flumazenil</div>
+                            </div>
+                        </div>
+
+                        <!-- Lorazepam -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Lorazepam</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Premedication:</strong> <span id="lorazepam-premed">-</span></div>
+                                <div><strong>IV sedation:</strong> <span id="lorazepam-sedation">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Intermediate-acting, longer duration than midazolam</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vasopressors and Inotropes -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-orange-700 dark:text-orange-400">VI. Vasopressors and Inotropes</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Phenylephrine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Phenylephrine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Bolus:</strong> <span id="phenylephrine-bolus">-</span></div>
+                                <div><strong>Infusion:</strong> <span id="phenylephrine-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Pure α1-agonist, increases SVR</div>
+                            </div>
+                        </div>
+
+                        <!-- Ephedrine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Ephedrine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Bolus:</strong> <span id="ephedrine-bolus">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Indirect sympathomimetic, increases HR and BP</div>
+                            </div>
+                        </div>
+
+                        <!-- Norepinephrine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Norepinephrine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Infusion:</strong> <span id="norepinephrine-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">α1/β1-agonist, first-line for septic shock</div>
+                            </div>
+                        </div>
+
+                        <!-- Epinephrine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Epinephrine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Anaphylaxis:</strong> <span id="epinephrine-anaphylaxis">-</span></div>
+                                <div><strong>Cardiac arrest:</strong> <span id="epinephrine-arrest">-</span></div>
+                                <div><strong>Infusion:</strong> <span id="epinephrine-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Non-selective adrenergic agonist</div>
+                            </div>
+                        </div>
+
+                        <!-- Dopamine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Dopamine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Infusion:</strong> <span id="dopamine-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Dose-dependent receptor activity</div>
+                            </div>
+                        </div>
+
+                        <!-- Dobutamine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Dobutamine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Infusion:</strong> <span id="dobutamine-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">β1-selective, positive inotrope</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency/Reversal Medications -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-red-700 dark:text-red-400">VII. Emergency/Reversal Medications</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Naloxone -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Naloxone</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Initial dose:</strong> <span id="naloxone-initial">-</span></div>
+                                <div><strong>Infusion:</strong> <span id="naloxone-infusion">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Opioid antagonist, short half-life</div>
+                            </div>
+                        </div>
+
+                        <!-- Flumazenil -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Flumazenil</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Initial dose:</strong> <span id="flumazenil-initial">-</span></div>
+                                <div><strong>Additional:</strong> <span id="flumazenil-additional">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Benzodiazepine antagonist, seizure risk</div>
+                            </div>
+                        </div>
+
+                        <!-- Sugammadex -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Sugammadex</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Routine reversal:</strong> <span id="sugammadex-routine">-</span></div>
+                                <div><strong>Deep block:</strong> <span id="sugammadex-deep">-</span></div>
+                                <div><strong>Immediate:</strong> <span id="sugammadex-immediate">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Specific for rocuronium/vecuronium</div>
+                            </div>
+                        </div>
+
+                        <!-- Neostigmine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Neostigmine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Reversal dose:</strong> <span id="neostigmine-dose">-</span></div>
+                                <div><strong>+ Glycopyrrolate:</strong> <span id="glycopyrrolate-dose">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Cholinesterase inhibitor, give with anticholinergic</div>
+                            </div>
+                        </div>
+
+                        <!-- Atropine -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Atropine</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Premedication:</strong> <span id="atropine-premed">-</span></div>
+                                <div><strong>Bradycardia:</strong> <span id="atropine-brady">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Anticholinergic, treats bradycardia</div>
+                            </div>
+                        </div>
+
+                        <!-- Dantrolene -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Dantrolene</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>MH treatment:</strong> <span id="dantrolene-mh">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">For malignant hyperthermia</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Antiemetics -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-teal-700 dark:text-teal-400">VIII. Antiemetics</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Ondansetron -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Ondansetron</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Adult dose:</strong> <span id="ondansetron-adult">-</span></div>
+                                <div><strong>Pediatric dose:</strong> <span id="ondansetron-pediatric">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">5-HT3 antagonist, QT prolongation risk</div>
+                            </div>
+                        </div>
+
+                        <!-- Dexamethasone -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Dexamethasone</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Antiemetic dose:</strong> <span id="dexamethasone-antiemetic">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Corticosteroid, anti-inflammatory</div>
+                            </div>
+                        </div>
+
+                        <!-- Metoclopramide -->
+                        <div class="bg-white dark:bg-gray-700 p-4 rounded border">
+                            <h4 class="font-medium mb-2">Metoclopramide</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Dose:</strong> <span id="metoclopramide-dose">-</span></div>
+                                <div class="text-xs text-gray-500 mt-2">Dopamine antagonist, prokinetic</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2432,6 +2891,539 @@
                 </div>
             `;
         }
+        // Anesthetic Medication Dosing Functions
+        function updateAllDoses() {
+            const weight = parseFloat(document.getElementById('patient-weight').value);
+            const age = parseFloat(document.getElementById('patient-age').value);
+            const ageGroup = document.getElementById('age-group').value;
+            
+            if (!weight || !age) return;
+            
+            // Update age group based on age if auto-detect is needed
+            autoSelectAgeGroup(age);
+            
+            // Calculate all medication doses
+            updateInductionAgents(weight, age, ageGroup);
+            updateOpioids(weight, age, ageGroup);
+            updateNMBs(weight, age, ageGroup);
+            updateLocalAnesthetics(weight, age, ageGroup);
+            updateSedatives(weight, age, ageGroup);
+            updateVasopressors(weight, age, ageGroup);
+            updateEmergencyMeds(weight, age, ageGroup);
+            updateAntiemetics(weight, age, ageGroup);
+        }
+
+        function autoSelectAgeGroup(age) {
+            const ageGroupSelect = document.getElementById('age-group');
+            if (age < 1/12) ageGroupSelect.value = 'neonate';
+            else if (age < 1) ageGroupSelect.value = 'infant';
+            else if (age < 3) ageGroupSelect.value = 'toddler';
+            else if (age < 6) ageGroupSelect.value = 'preschool';
+            else if (age < 12) ageGroupSelect.value = 'school';
+            else if (age < 18) ageGroupSelect.value = 'adolescent';
+            else if (age < 65) ageGroupSelect.value = 'adult';
+            else ageGroupSelect.value = 'elderly';
+        }
+
+        function updateInductionAgents(weight, age, ageGroup) {
+            // Propofol
+            let propofolInduction, propofolMaintenance, propofolSedation;
+            if (ageGroup === 'neonate' || ageGroup === 'infant') {
+                propofolInduction = `${(weight * 2.5).toFixed(1)}-${(weight * 3.5).toFixed(1)} mg`;
+                propofolMaintenance = `${(weight * 125).toFixed(0)}-${(weight * 300).toFixed(0)} mcg/kg/min`;
+                propofolSedation = `${(weight * 25).toFixed(0)}-${(weight * 100).toFixed(0)} mcg/kg/min`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                propofolInduction = `${(weight * 2.5).toFixed(1)}-${(weight * 3.5).toFixed(1)} mg`;
+                propofolMaintenance = `${(weight * 100).toFixed(0)}-${(weight * 300).toFixed(0)} mcg/kg/min`;
+                propofolSedation = `${(weight * 25).toFixed(0)}-${(weight * 100).toFixed(0)} mcg/kg/min`;
+            } else if (ageGroup === 'elderly') {
+                propofolInduction = `${(weight * 1.0).toFixed(1)}-${(weight * 1.5).toFixed(1)} mg`;
+                propofolMaintenance = `${(weight * 50).toFixed(0)}-${(weight * 150).toFixed(0)} mcg/kg/min`;
+                propofolSedation = `${(weight * 10).toFixed(0)}-${(weight * 50).toFixed(0)} mcg/kg/min`;
+            } else {
+                propofolInduction = `${(weight * 1.5).toFixed(1)}-${(weight * 2.5).toFixed(1)} mg`;
+                propofolMaintenance = `${(weight * 100).toFixed(0)}-${(weight * 200).toFixed(0)} mcg/kg/min`;
+                propofolSedation = `${(weight * 25).toFixed(0)}-${(weight * 75).toFixed(0)} mcg/kg/min`;
+            }
+            
+            document.getElementById('propofol-induction').textContent = propofolInduction;
+            document.getElementById('propofol-maintenance').textContent = propofolMaintenance;
+            document.getElementById('propofol-sedation').textContent = propofolSedation;
+
+            // Ketamine
+            let ketamineInduction, ketamineIM, ketamineAnalgesic;
+            if (ageGroup === 'neonate' || ageGroup === 'infant') {
+                ketamineInduction = `${(weight * 1.0).toFixed(1)}-${(weight * 2.0).toFixed(1)} mg IV`;
+                ketamineIM = `${(weight * 5.0).toFixed(1)}-${(weight * 10.0).toFixed(1)} mg IM`;
+                ketamineAnalgesic = `${(weight * 0.1).toFixed(1)}-${(weight * 0.5).toFixed(1)} mg`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                ketamineInduction = `${(weight * 1.5).toFixed(1)}-${(weight * 2.5).toFixed(1)} mg IV`;
+                ketamineIM = `${(weight * 6.0).toFixed(1)}-${(weight * 10.0).toFixed(1)} mg IM`;
+                ketamineAnalgesic = `${(weight * 0.2).toFixed(1)}-${(weight * 0.5).toFixed(1)} mg`;
+            } else {
+                ketamineInduction = `${(weight * 1.0).toFixed(1)}-${(weight * 2.0).toFixed(1)} mg IV`;
+                ketamineIM = `${(weight * 4.0).toFixed(1)}-${(weight * 8.0).toFixed(1)} mg IM`;
+                ketamineAnalgesic = `${(weight * 0.1).toFixed(1)}-${(weight * 0.5).toFixed(1)} mg`;
+            }
+            
+            document.getElementById('ketamine-induction').textContent = ketamineInduction;
+            document.getElementById('ketamine-im').textContent = ketamineIM;
+            document.getElementById('ketamine-analgesic').textContent = ketamineAnalgesic;
+
+            // Etomidate
+            const etomidateInduction = ageGroup === 'elderly' ? 
+                `${(weight * 0.2).toFixed(1)}-${(weight * 0.25).toFixed(1)} mg` :
+                `${(weight * 0.2).toFixed(1)}-${(weight * 0.3).toFixed(1)} mg`;
+            document.getElementById('etomidate-induction').textContent = etomidateInduction;
+
+            // Dexmedetomidine
+            const dexmedLoading = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.5).toFixed(1)} mcg over 10 min` :
+                `${(weight * 1.0).toFixed(1)} mcg over 10 min`;
+            const dexmedMaintenance = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.2).toFixed(1)}-${(weight * 0.7).toFixed(1)} mcg/kg/hr` :
+                `${(weight * 0.2).toFixed(1)}-${(weight * 1.0).toFixed(1)} mcg/kg/hr`;
+            
+            document.getElementById('dexmed-loading').textContent = dexmedLoading;
+            document.getElementById('dexmed-maintenance').textContent = dexmedMaintenance;
+
+            // Thiopental
+            const thiopentalInduction = ageGroup === 'elderly' ?
+                `${(weight * 3.0).toFixed(1)}-${(weight * 4.0).toFixed(1)} mg` :
+                `${(weight * 4.0).toFixed(1)}-${(weight * 6.0).toFixed(1)} mg`;
+            document.getElementById('thiopental-induction').textContent = thiopentalInduction;
+
+            // Remimazolam
+            const remimazolamInduction = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.1).toFixed(1)}-${(weight * 0.2).toFixed(1)} mg` :
+                `${(weight * 0.2).toFixed(1)}-${(weight * 0.35).toFixed(1)} mg`;
+            const remimazolamMaintenance = `${(weight * 1.0).toFixed(1)}-${(weight * 2.0).toFixed(1)} mg/hr`;
+            
+            document.getElementById('remimazolam-induction').textContent = remimazolamInduction;
+            document.getElementById('remimazolam-maintenance').textContent = remimazolamMaintenance;
+        }
+
+        function updateOpioids(weight, age, ageGroup) {
+            // Fentanyl
+            let fentanylBolus, fentanylInfusion, fentanylEpidural;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                fentanylBolus = `${(weight * 1).toFixed(1)}-${(weight * 3).toFixed(1)} mcg`;
+                fentanylInfusion = `${(weight * 0.5).toFixed(1)}-${(weight * 2).toFixed(1)} mcg/kg/hr`;
+                fentanylEpidural = `${(weight * 1).toFixed(1)} mcg`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                fentanylBolus = `${(weight * 1).toFixed(1)}-${(weight * 3).toFixed(1)} mcg`;
+                fentanylInfusion = `${(weight * 0.5).toFixed(1)}-${(weight * 2).toFixed(1)} mcg/kg/hr`;
+                fentanylEpidural = `${(weight * 1).toFixed(1)}-${(weight * 2).toFixed(1)} mcg`;
+            } else {
+                fentanylBolus = `${(weight * 1).toFixed(1)}-${(weight * 3).toFixed(1)} mcg`;
+                fentanylInfusion = `${(weight * 0.5).toFixed(1)}-${(weight * 3).toFixed(1)} mcg/kg/hr`;
+                fentanylEpidural = `${(weight * 2).toFixed(1)}-${(weight * 4).toFixed(1)} mcg`;
+            }
+            
+            document.getElementById('fentanyl-bolus').textContent = fentanylBolus;
+            document.getElementById('fentanyl-infusion').textContent = fentanylInfusion;
+            document.getElementById('fentanyl-epidural').textContent = fentanylEpidural;
+
+            // Morphine
+            let morphineBolus, morphineIM, morphineEpidural;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                morphineBolus = `${(weight * 0.05).toFixed(2)}-${(weight * 0.1).toFixed(2)} mg`;
+                morphineIM = `${(weight * 0.1).toFixed(2)}-${(weight * 0.2).toFixed(2)} mg`;
+                morphineEpidural = `${(weight * 0.03).toFixed(2)}-${(weight * 0.05).toFixed(2)} mg`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                morphineBolus = `${(weight * 0.1).toFixed(1)}-${(weight * 0.2).toFixed(1)} mg`;
+                morphineIM = `${(weight * 0.1).toFixed(1)}-${(weight * 0.2).toFixed(1)} mg`;
+                morphineEpidural = `${(weight * 0.05).toFixed(2)}-${(weight * 0.1).toFixed(2)} mg`;
+            } else {
+                morphineBolus = `${(weight * 0.1).toFixed(1)}-${(weight * 0.15).toFixed(1)} mg`;
+                morphineIM = `${(weight * 0.1).toFixed(1)}-${(weight * 0.15).toFixed(1)} mg`;
+                morphineEpidural = `${(weight * 0.05).toFixed(1)}-${(weight * 0.1).toFixed(1)} mg`;
+            }
+            
+            document.getElementById('morphine-bolus').textContent = morphineBolus;
+            document.getElementById('morphine-im').textContent = morphineIM;
+            document.getElementById('morphine-epidural').textContent = morphineEpidural;
+
+            // Sufentanil
+            const sufentanilBolus = ageGroup === 'elderly' ?
+                `${(weight * 0.1).toFixed(1)}-${(weight * 0.3).toFixed(1)} mcg` :
+                `${(weight * 0.2).toFixed(1)}-${(weight * 0.5).toFixed(1)} mcg`;
+            const sufentanilInfusion = `${(weight * 0.1).toFixed(1)}-${(weight * 0.5).toFixed(1)} mcg/kg/hr`;
+            
+            document.getElementById('sufentanil-bolus').textContent = sufentanilBolus;
+            document.getElementById('sufentanil-infusion').textContent = sufentanilInfusion;
+
+            // Remifentanil
+            const remifentanilBolus = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.5).toFixed(1)}-${(weight * 1.0).toFixed(1)} mcg` :
+                `${(weight * 0.5).toFixed(1)}-${(weight * 1.5).toFixed(1)} mcg`;
+            const remifentanilInfusion = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.05).toFixed(2)}-${(weight * 0.2).toFixed(2)} mcg/kg/min` :
+                `${(weight * 0.1).toFixed(2)}-${(weight * 0.5).toFixed(2)} mcg/kg/min`;
+            
+            document.getElementById('remifentanil-bolus').textContent = remifentanilBolus;
+            document.getElementById('remifentanil-infusion').textContent = remifentanilInfusion;
+
+            // Hydromorphone
+            const hydromorphoneBolus = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.01).toFixed(2)}-${(weight * 0.02).toFixed(2)} mg` :
+                `${(weight * 0.015).toFixed(2)}-${(weight * 0.03).toFixed(2)} mg`;
+            const hydromorphoneIM = `${(weight * 0.02).toFixed(2)}-${(weight * 0.04).toFixed(2)} mg`;
+            
+            document.getElementById('hydromorphone-bolus').textContent = hydromorphoneBolus;
+            document.getElementById('hydromorphone-im').textContent = hydromorphoneIM;
+
+            // Tramadol
+            let tramadolDose, tramadolOral;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                tramadolDose = `${(weight * 1).toFixed(1)}-${(weight * 2).toFixed(1)} mg`;
+                tramadolOral = `${(weight * 2).toFixed(1)}-${(weight * 3).toFixed(1)} mg`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                tramadolDose = `${(weight * 1).toFixed(1)}-${(weight * 2).toFixed(1)} mg`;
+                tramadolOral = `${(weight * 2).toFixed(1)}-${(weight * 3).toFixed(1)} mg`;
+            } else {
+                tramadolDose = `${Math.min(weight * 1.5, 100).toFixed(0)} mg`;
+                tramadolOral = `${Math.min(weight * 2, 100).toFixed(0)} mg`;
+            }
+            
+            document.getElementById('tramadol-dose').textContent = tramadolDose;
+            document.getElementById('tramadol-oral').textContent = tramadolOral;
+        }
+
+        function updateNMBs(weight, age, ageGroup) {
+            // Succinylcholine
+            let succinylcholineIV, succinylcholineIM;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                succinylcholineIV = `${(weight * 2).toFixed(1)}-${(weight * 3).toFixed(1)} mg`;
+                succinylcholineIM = `${(weight * 4).toFixed(1)}-${(weight * 5).toFixed(1)} mg`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                succinylcholineIV = `${(weight * 1.5).toFixed(1)}-${(weight * 2).toFixed(1)} mg`;
+                succinylcholineIM = `${(weight * 4).toFixed(1)}-${(weight * 5).toFixed(1)} mg`;
+            } else {
+                succinylcholineIV = `${(weight * 1).toFixed(1)}-${(weight * 1.5).toFixed(1)} mg`;
+                succinylcholineIM = `${(weight * 3).toFixed(1)}-${(weight * 4).toFixed(1)} mg`;
+            }
+            
+            document.getElementById('succinylcholine-iv').textContent = succinylcholineIV;
+            document.getElementById('succinylcholine-im').textContent = succinylcholineIM;
+
+            // Rocuronium
+            let rocuroniumIntubation, rocuroniumMaintenance, rocuroniumRSI;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                rocuroniumIntubation = `${(weight * 0.6).toFixed(1)} mg`;
+                rocuroniumMaintenance = `${(weight * 0.15).toFixed(2)} mg q30-45min`;
+                rocuroniumRSI = `${(weight * 1.0).toFixed(1)} mg`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                rocuroniumIntubation = `${(weight * 0.6).toFixed(1)}-${(weight * 0.9).toFixed(1)} mg`;
+                rocuroniumMaintenance = `${(weight * 0.15).toFixed(2)} mg q20-30min`;
+                rocuroniumRSI = `${(weight * 1.2).toFixed(1)} mg`;
+            } else {
+                rocuroniumIntubation = `${(weight * 0.6).toFixed(1)} mg`;
+                rocuroniumMaintenance = `${(weight * 0.15).toFixed(2)} mg q30-40min`;
+                rocuroniumRSI = `${(weight * 1.0).toFixed(1)}-${(weight * 1.2).toFixed(1)} mg`;
+            }
+            
+            document.getElementById('rocuronium-intubation').textContent = rocuroniumIntubation;
+            document.getElementById('rocuronium-maintenance').textContent = rocuroniumMaintenance;
+            document.getElementById('rocuronium-rsi').textContent = rocuroniumRSI;
+
+            // Vecuronium
+            const vecuroniumIntubation = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.1).toFixed(2)} mg` :
+                `${(weight * 0.1).toFixed(2)} mg`;
+            const vecuroniumMaintenance = `${(weight * 0.02).toFixed(2)} mg q25-40min`;
+            
+            document.getElementById('vecuronium-intubation').textContent = vecuroniumIntubation;
+            document.getElementById('vecuronium-maintenance').textContent = vecuroniumMaintenance;
+
+            // Cisatracurium
+            const cisatracuriumIntubation = `${(weight * 0.15).toFixed(2)}-${(weight * 0.2).toFixed(2)} mg`;
+            const cisatracuriumMaintenance = `${(weight * 0.03).toFixed(2)} mg q40-60min`;
+            
+            document.getElementById('cisatracurium-intubation').textContent = cisatracuriumIntubation;
+            document.getElementById('cisatracurium-maintenance').textContent = cisatracuriumMaintenance;
+
+            // Atracurium
+            const atracuriumIntubation = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.3).toFixed(1)}-${(weight * 0.4).toFixed(1)} mg` :
+                `${(weight * 0.5).toFixed(1)} mg`;
+            const atracuriumMaintenance = `${(weight * 0.1).toFixed(2)} mg q20-45min`;
+            
+            document.getElementById('atracurium-intubation').textContent = atracuriumIntubation;
+            document.getElementById('atracurium-maintenance').textContent = atracuriumMaintenance;
+        }
+
+        function updateLocalAnesthetics(weight, age, ageGroup) {
+            // Lidocaine
+            let lidocaineLocal, lidocaineEpidural, lidocaineSpinal, lidocaineMax;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                lidocaineLocal = '0.25-0.5% solution';
+                lidocaineEpidural = '1-1.5% solution';
+                lidocaineSpinal = 'Not recommended';
+                lidocaineMax = `${(weight * 3).toFixed(1)} mg (max)`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                lidocaineLocal = '0.5-1% solution';
+                lidocaineEpidural = '1-2% solution';
+                lidocaineSpinal = '5% solution, 1-2 mg/kg';
+                lidocaineMax = `${(weight * 4.5).toFixed(1)} mg (max)`;
+            } else {
+                lidocaineLocal = '0.5-1% solution';
+                lidocaineEpidural = '1.5-2% solution';
+                lidocaineSpinal = '5% solution, 50-100 mg';
+                lidocaineMax = `${Math.min(weight * 4.5, 300).toFixed(0)} mg (max)`;
+            }
+            
+            document.getElementById('lidocaine-local').textContent = lidocaineLocal;
+            document.getElementById('lidocaine-epidural').textContent = lidocaineEpidural;
+            document.getElementById('lidocaine-spinal').textContent = lidocaineSpinal;
+            document.getElementById('lidocaine-max').textContent = lidocaineMax;
+
+            // Bupivacaine
+            let bupivacaineEpidural, bupivacaineSpinal, bupivacaineBlock, bupivacaineMax;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                bupivacaineEpidural = '0.125-0.25% solution';
+                bupivacaineSpinal = 'Not recommended';
+                bupivacaineBlock = '0.25% solution';
+                bupivacaineMax = `${(weight * 2).toFixed(1)} mg (max)`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                bupivacaineEpidural = '0.25% solution';
+                bupivacaineSpinal = '0.5% solution, 0.3-0.5 mg/kg';
+                bupivacaineBlock = '0.25-0.5% solution';
+                bupivacaineMax = `${(weight * 2.5).toFixed(1)} mg (max)`;
+            } else {
+                bupivacaineEpidural = '0.25-0.5% solution';
+                bupivacaineSpinal = '0.5% solution, 10-20 mg';
+                bupivacaineBlock = '0.25-0.5% solution';
+                bupivacaineMax = `${Math.min(weight * 2.5, 175).toFixed(0)} mg (max)`;
+            }
+            
+            document.getElementById('bupivacaine-epidural').textContent = bupivacaineEpidural;
+            document.getElementById('bupivacaine-spinal').textContent = bupivacaineSpinal;
+            document.getElementById('bupivacaine-block').textContent = bupivacaineBlock;
+            document.getElementById('bupivacaine-max').textContent = bupivacaineMax;
+
+            // Ropivacaine
+            const ropivacaineEpidural = ['neonate', 'infant'].includes(ageGroup) ?
+                '0.2% solution' : '0.2-0.5% solution';
+            const ropivacaineBlock = '0.2-0.5% solution';
+            const ropivacaineMax = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 2).toFixed(1)} mg (max)` :
+                `${Math.min(weight * 3, 200).toFixed(0)} mg (max)`;
+            
+            document.getElementById('ropivacaine-epidural').textContent = ropivacaineEpidural;
+            document.getElementById('ropivacaine-block').textContent = ropivacaineBlock;
+            document.getElementById('ropivacaine-max').textContent = ropivacaineMax;
+        }
+
+        function updateSedatives(weight, age, ageGroup) {
+            // Midazolam
+            let midazolamPremed, midazolamSedation, midazolamPediatric;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                midazolamPremed = `${(weight * 0.05).toFixed(2)}-${(weight * 0.1).toFixed(2)} mg IV`;
+                midazolamSedation = `${(weight * 0.02).toFixed(2)}-${(weight * 0.1).toFixed(2)} mg`;
+                midazolamPediatric = `${(weight * 0.25).toFixed(2)}-${(weight * 0.5).toFixed(2)} mg PO`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                midazolamPremed = `${(weight * 0.05).toFixed(2)}-${(weight * 0.1).toFixed(2)} mg IV`;
+                midazolamSedation = `${(weight * 0.05).toFixed(2)}-${(weight * 0.2).toFixed(2)} mg`;
+                midazolamPediatric = `${(weight * 0.5).toFixed(1)}-${(weight * 0.75).toFixed(1)} mg PO`;
+            } else {
+                midazolamPremed = `${Math.min(weight * 0.07, 5).toFixed(1)} mg IV`;
+                midazolamSedation = `1-5 mg IV (titrate)`;
+                midazolamPediatric = 'N/A (adult)';
+            }
+            
+            document.getElementById('midazolam-premed').textContent = midazolamPremed;
+            document.getElementById('midazolam-sedation').textContent = midazolamSedation;
+            document.getElementById('midazolam-pediatric').textContent = midazolamPediatric;
+
+            // Lorazepam
+            const lorazepamPremed = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.02).toFixed(2)}-${(weight * 0.05).toFixed(2)} mg` :
+                `${Math.min(weight * 0.04, 2).toFixed(1)} mg`;
+            const lorazepamSedation = ageGroup === 'adult' || ageGroup === 'elderly' ?
+                '0.5-2 mg IV' : `${(weight * 0.05).toFixed(2)} mg`;
+            
+            document.getElementById('lorazepam-premed').textContent = lorazepamPremed;
+            document.getElementById('lorazepam-sedation').textContent = lorazepamSedation;
+        }
+
+        function updateVasopressors(weight, age, ageGroup) {
+            // Phenylephrine
+            let phenylephrineBolus, phenylephrineInfusion;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                phenylephrineBolus = `${(weight * 1).toFixed(1)}-${(weight * 5).toFixed(1)} mcg`;
+                phenylephrineInfusion = `0.1-0.5 mcg/kg/min`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                phenylephrineBolus = `${(weight * 1).toFixed(1)}-${(weight * 5).toFixed(1)} mcg`;
+                phenylephrineInfusion = `0.1-0.5 mcg/kg/min`;
+            } else {
+                phenylephrineBolus = `50-200 mcg IV`;
+                phenylephrineInfusion = `0.2-2 mcg/kg/min`;
+            }
+            
+            document.getElementById('phenylephrine-bolus').textContent = phenylephrineBolus;
+            document.getElementById('phenylephrine-infusion').textContent = phenylephrineInfusion;
+
+            // Ephedrine
+            const ephedrineBolus = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.1).toFixed(1)}-${(weight * 0.3).toFixed(1)} mg` :
+                ageGroup === 'adult' || ageGroup === 'elderly' ?
+                '5-25 mg IV' : `${(weight * 0.2).toFixed(1)}-${(weight * 0.3).toFixed(1)} mg`;
+            
+            document.getElementById('ephedrine-bolus').textContent = ephedrineBolus;
+
+            // Norepinephrine
+            const norepinephrineInfusion = ['neonate', 'infant'].includes(ageGroup) ?
+                '0.05-0.5 mcg/kg/min' : '0.01-3 mcg/kg/min';
+            
+            document.getElementById('norepinephrine-infusion').textContent = norepinephrineInfusion;
+
+            // Epinephrine
+            let epinephrineAnaphylaxis, epinephrineArrest, epinephrineInfusion;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                epinephrineAnaphylaxis = `${(weight * 0.01).toFixed(2)} mg (1:1000 IM)`;
+                epinephrineArrest = `${(weight * 0.01).toFixed(2)} mg (1:10000 IV)`;
+                epinephrineInfusion = '0.02-0.3 mcg/kg/min';
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                epinephrineAnaphylaxis = weight < 30 ? '0.15 mg (EpiPen Jr)' : '0.3 mg (EpiPen)';
+                epinephrineArrest = `${(weight * 0.01).toFixed(2)} mg (1:10000 IV)`;
+                epinephrineInfusion = '0.02-0.3 mcg/kg/min';
+            } else {
+                epinephrineAnaphylaxis = '0.3-0.5 mg (1:1000 IM)';
+                epinephrineArrest = '1 mg (1:10000 IV)';
+                epinephrineInfusion = '0.01-0.3 mcg/kg/min';
+            }
+            
+            document.getElementById('epinephrine-anaphylaxis').textContent = epinephrineAnaphylaxis;
+            document.getElementById('epinephrine-arrest').textContent = epinephrineArrest;
+            document.getElementById('epinephrine-infusion').textContent = epinephrineInfusion;
+
+            // Dopamine
+            const dopamineInfusion = ['neonate', 'infant'].includes(ageGroup) ?
+                '2-10 mcg/kg/min' : '2-20 mcg/kg/min';
+            
+            document.getElementById('dopamine-infusion').textContent = dopamineInfusion;
+
+            // Dobutamine
+            const dobutamineInfusion = ['neonate', 'infant'].includes(ageGroup) ?
+                '2-10 mcg/kg/min' : '2.5-15 mcg/kg/min';
+            
+            document.getElementById('dobutamine-infusion').textContent = dobutamineInfusion;
+        }
+
+        function updateEmergencyMeds(weight, age, ageGroup) {
+            // Naloxone
+            let naloxoneInitial, naloxoneInfusion;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                naloxoneInitial = `${(weight * 0.01).toFixed(2)} mg IV`;
+                naloxoneInfusion = `${(weight * 0.002).toFixed(3)}-${(weight * 0.01).toFixed(2)} mg/hr`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                naloxoneInitial = `${(weight * 0.01).toFixed(2)} mg IV (max 2 mg)`;
+                naloxoneInfusion = `${(weight * 0.002).toFixed(3)}-${(weight * 0.01).toFixed(2)} mg/hr`;
+            } else {
+                naloxoneInitial = '0.04-0.4 mg IV (up to 2 mg)';
+                naloxoneInfusion = '0.25-0.4 mg/hr';
+            }
+            
+            document.getElementById('naloxone-initial').textContent = naloxoneInitial;
+            document.getElementById('naloxone-infusion').textContent = naloxoneInfusion;
+
+            // Flumazenil
+            const flumazenilInitial = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.01).toFixed(2)} mg IV` : '0.1-0.2 mg IV';
+            const flumazenilAdditional = '0.1 mg q60sec (max 1 mg)';
+            
+            document.getElementById('flumazenil-initial').textContent = flumazenilInitial;
+            document.getElementById('flumazenil-additional').textContent = flumazenilAdditional;
+
+            // Sugammadex
+            let sugammadexRoutine, sugammadexDeep, sugammadexImmediate;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                sugammadexRoutine = `${(weight * 2).toFixed(1)} mg`;
+                sugammadexDeep = `${(weight * 4).toFixed(1)} mg`;
+                sugammadexImmediate = `${(weight * 16).toFixed(1)} mg`;
+            } else {
+                sugammadexRoutine = `${(weight * 2).toFixed(1)} mg`;
+                sugammadexDeep = `${(weight * 4).toFixed(1)} mg`;
+                sugammadexImmediate = `${(weight * 16).toFixed(1)} mg`;
+            }
+            
+            document.getElementById('sugammadx-routine').textContent = sugammadexRoutine;
+            document.getElementById('sugammadx-deep').textContent = sugammadexDeep;
+            document.getElementById('sugammadx-immediate').textContent = sugammadexImmediate;
+
+            // Neostigmine
+            const neostigmineDose = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.03).toFixed(2)}-${(weight * 0.07).toFixed(2)} mg` :
+                `${(weight * 0.04).toFixed(2)}-${(weight * 0.07).toFixed(2)} mg`;
+            const glycopyrrolateDose = `${(weight * 0.01).toFixed(2)} mg`;
+            
+            document.getElementById('neostigmine-dose').textContent = neostigmineDose;
+            document.getElementById('glycopyrrolate-dose').textContent = glycopyrrolateDose;
+
+            // Atropine
+            let atropinePremed, atropineBrady;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                atropinePremed = `${(weight * 0.02).toFixed(2)} mg (min 0.1 mg)`;
+                atropineBrady = `${(weight * 0.02).toFixed(2)} mg (min 0.1 mg)`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                atropinePremed = `${(weight * 0.02).toFixed(2)} mg (min 0.1 mg)`;
+                atropineBrady = `${(weight * 0.02).toFixed(2)} mg (min 0.1 mg)`;
+            } else {
+                atropinePremed = '0.5-1 mg IV';
+                atropineBrady = '0.5-1 mg IV';
+            }
+            
+            document.getElementById('atropine-premed').textContent = atropinePremed;
+            document.getElementById('atropine-brady').textContent = atropineBrady;
+
+            // Dantrolene
+            const dantroleneMH = `${(weight * 2.5).toFixed(1)} mg IV (continue until symptoms resolve)`;
+            
+            document.getElementById('dantrolene-mh').textContent = dantroleneMH;
+        }
+
+        function updateAntiemetics(weight, age, ageGroup) {
+            // Ondansetron
+            let ondansetronAdult, ondansetronPediatric;
+            if (['neonate', 'infant'].includes(ageGroup)) {
+                ondansetronAdult = 'See pediatric dose';
+                ondansetronPediatric = `${(weight * 0.1).toFixed(1)} mg (max 4 mg)`;
+            } else if (['toddler', 'preschool', 'school'].includes(ageGroup)) {
+                ondansetronAdult = 'See pediatric dose';
+                ondansetronPediatric = `${(weight * 0.15).toFixed(1)} mg (max 8 mg)`;
+            } else {
+                ondansetronAdult = '4-8 mg IV';
+                ondansetronPediatric = 'N/A (adult)';
+            }
+            
+            document.getElementById('ondansetron-adult').textContent = ondansetronAdult;
+            document.getElementById('ondansetron-pediatric').textContent = ondansetronPediatric;
+
+            // Dexamethasone
+            const dexamethasoneAntiemetic = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.1).toFixed(1)}-${(weight * 0.2).toFixed(1)} mg` :
+                ageGroup === 'adult' || ageGroup === 'elderly' ?
+                '4-8 mg IV' : `${(weight * 0.15).toFixed(1)} mg (max 8 mg)`;
+            
+            document.getElementById('dexamethasone-antiemetic').textContent = dexamethasoneAntiemetic;
+
+            // Metoclopramide
+            const metoclopramideDose = ['neonate', 'infant'].includes(ageGroup) ?
+                `${(weight * 0.1).toFixed(1)} mg` :
+                ageGroup === 'adult' || ageGroup === 'elderly' ?
+                '10 mg IV' : `${(weight * 0.15).toFixed(1)} mg (max 10 mg)`;
+            
+            document.getElementById('metoclopramide-dose').textContent = metoclopramideDose;
+        }
+
+        // Initialize anesthesia tab when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default values and update doses
+            document.getElementById('patient-weight').value = '70';
+            document.getElementById('patient-age').value = '30';
+            updateAllDoses();
+        });
     </script>
 </body>
 </html>
