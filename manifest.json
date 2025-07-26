@@ -1,0 +1,24 @@
+{
+  "name": "ICU Calculator Suite",
+  "short_name": "ICU Calc",
+  "description": "Essential calculators for intensive care medicine",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#5D5CDE",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%235D5CDE'/><text y='350' font-size='300' text-anchor='middle' x='256' fill='white'>🏥</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%235D5CDE'/><text y='130' font-size='120' text-anchor='middle' x='96' fill='white'>🏥</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
